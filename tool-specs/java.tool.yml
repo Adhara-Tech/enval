@@ -1,0 +1,30 @@
+name: java
+description: java
+command: java
+version_command_args:
+  - --version
+flavors:
+  - name: openjdk
+    version_checker:
+      parser:
+        regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
+      fields:
+        version: semver
+#    version_args: #overrides
+#      - --version
+#    #openjdk 11.0.2 2019-01-15
+#    version_parser:
+#      regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
+#    version_fields:
+#      version: semver
+#      runtime_environment: fixed
+#      servver_environment: semver
+    #regexp
+  - name: oracle
+    version_checker:
+      parser:
+        regexp: 'java (?P<version>\d+\.\d+\.\d+)'
+      fields:
+        version: semver
+#    codesnippet: "java.ingredient.oracle.js"
+    #regexp:

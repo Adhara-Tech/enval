@@ -1,0 +1,8 @@
+name: golangci-lint
+description: superfast go linters aggregator
+command: golangci-lint
+version_args:
+  - version
+version_parser:
+  regexp: "blabla"
+
