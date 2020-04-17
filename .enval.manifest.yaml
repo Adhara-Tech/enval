@@ -4,10 +4,10 @@ tools:
   - name: java
     flavor: openjdk
     checks:
-      version: ">= 11.0.0" #semver,date, fixed, custom (regexp or code snippet)
-#  - name: go
-#    version: "1.14.x" #npm maven
-#  - name: golangci-lint
-#    checks:
-#      version: "[1.24.0]"
-#      runtime_environment:
+      version: ">= 11.0.0"
+  - name: go
+    checks:
+      version: ">= 1.14"
+  - name: golangci-lint
+    checks:
+      version: "= 1.23.7"

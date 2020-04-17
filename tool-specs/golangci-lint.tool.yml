@@ -1,8 +1,10 @@
 name: golangci-lint
 description: superfast go linters aggregator
 command: golangci-lint
-version_args:
+version_command_args:
   - version
-version_parser:
-  regexp: "blabla"
-
+version_checker:
+  parser:
+    regexp: 'golangci-lint has version (?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    version: semver

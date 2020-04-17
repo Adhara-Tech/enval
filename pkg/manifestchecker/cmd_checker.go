@@ -13,12 +13,12 @@ type Checker interface {
 	Check(manifest model.Manifest, notifier CheckNotifier) error
 }
 type Notification struct {
-	Command          string
-	CommandFound     bool
-	VersionRequested string
-	VersionFound     string
-	VersionValid     bool
-	Error            string
+	Tool               model.ManifestTool
+	IsToolAvailable    bool
+	VersionsFound      map[string]string
+	VersionValidations map[string]bool
+	IsVersionValid     bool
+	Error              string
 }
 type CheckNotifier func(notification Notification)
 
@@ -71,7 +71,7 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 			return err
 		}
 
-		fmt.Println(versionCommandOutputStr)
+		//fmt.Println(versionCommandOutputStr)
 
 		versionChecker, err := tool.ConsolidateVersionChecker(currentToolConfig.Flavor)
 		if err != nil {
@@ -86,16 +86,26 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 				return err
 			}
 
-			fmt.Println(versionFieldValues)
+			//fmt.Println(versionFieldValues)
+		}
+		notification := Notification{
+			Tool:               currentToolConfig,
+			IsToolAvailable:    true,
+			VersionsFound:      make(map[string]string),
+			VersionValidations: make(map[string]bool),
+			IsVersionValid:     true,
+			Error:              "",
 		}
 
 		for fieldName, expectedVersion := range currentToolConfig.Checks {
+
 			versionCheckType, ok := versionChecker.Fields[fieldName]
 			if !ok {
 				//TODO
 				return fmt.Errorf("TODO versionchecktype")
 			}
 			fieldValue, ok := versionFieldValues[fieldName]
+			notification.VersionsFound[fieldName] = fieldValue
 			if !ok {
 				//TODO
 				return fmt.Errorf("TODO fieldValue")
@@ -113,12 +123,17 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 				}
 
 				validVersion := versionContraint.Check(version)
+				notification.VersionValidations[fieldName] = validVersion
 				if !validVersion {
-					//TODO
-					return fmt.Errorf("TODO invalid version")
+					notification.IsVersionValid = false
 				}
+				//	//TODO
+				//	//return fmt.Errorf("TODO invalid version")
+				//
+				//}
 			}
 		}
+		notifier(notification)
 	}
 	return nil
 }
