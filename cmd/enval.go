@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -72,16 +74,16 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 
 	err = theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
 		if !msg.IsToolAvailable {
-			fmt.Printf("x %s %s", toolName(msg.Tool), "Command Not Found")
+			fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
 			return
 		}
 
 		if !msg.IsVersionValid {
-			fmt.Printf("x %s checks:\n%s", toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
+			fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
 			return
 		}
 
-		fmt.Printf("v %s checks:\n%s", toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
+		fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
 	})
 	if err != nil {
 		panic(err)
@@ -89,6 +91,10 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 
 	return nil
 }
+
+var validSymbol = color.GreenString("✔")
+var invalidSymbol = color.RedString("!")
+var notFoundSymbol = color.RedString("∅")
 
 func toolName(tool model.ManifestTool) string {
 	if tool.Flavor != nil {
@@ -98,14 +104,17 @@ func toolName(tool model.ManifestTool) string {
 }
 
 func renderVersions(tool model.ManifestTool, fieldVersions map[string]string, fieldOk map[string]bool) string {
+
 	var buffer bytes.Buffer
 	for fieldName, versionConstraint := range tool.Checks {
 		ok := fieldOk[fieldName]
 		version := fieldVersions[fieldName]
-		symbol := "v"
+		symbol := validSymbol
+
 		if !ok {
-			symbol = "x"
+			symbol = invalidSymbol
 		}
+
 		buffer.WriteString(fmt.Sprintf("    %s %s(%s): %s\n", symbol, fieldName, versionConstraint, version))
 	}
 
