@@ -37,9 +37,6 @@ func (parser *RegexpVersionParser) Parse(rawVersion string) (map[string]string, 
 		if counter != 0 && parser.isKeyPresent(groupName) {
 			resultMap[groupName] = match[counter]
 		}
-		//if counter != 0 && groupName == "version" {
-		//	return match[counter], nil
-		//}
 	}
 
 	for _, currentKey := range parser.keys {
