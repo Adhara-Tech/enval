@@ -1,8 +1,8 @@
 package adapters
 
 import (
-	"Adhara-Tech/check-my-setup/pkg/manifestchecker"
-	"Adhara-Tech/check-my-setup/pkg/model"
+	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
+	"github.com/Adhara-Tech/enval/pkg/model"
 )
 
 var _ manifestchecker.ToolsStorageAdapter = (*DefaultToolsStorageAdapter)(nil)

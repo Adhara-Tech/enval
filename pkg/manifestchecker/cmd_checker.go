@@ -1,10 +1,11 @@
 package manifestchecker
 
 import (
-	"Adhara-Tech/check-my-setup/pkg/model"
 	"errors"
 	"fmt"
 	"os/exec"
+
+	"github.com/Adhara-Tech/enval/pkg/model"
 
 	"github.com/Masterminds/semver/v3"
 )

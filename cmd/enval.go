@@ -1,15 +1,16 @@
 package main
 
 import (
-	"Adhara-Tech/check-my-setup/cmd/version"
-	"Adhara-Tech/check-my-setup/pkg/adapters"
-	"Adhara-Tech/check-my-setup/pkg/config"
-	"Adhara-Tech/check-my-setup/pkg/infra"
-	"Adhara-Tech/check-my-setup/pkg/manifestchecker"
-	"Adhara-Tech/check-my-setup/pkg/model"
 	"bytes"
 	"fmt"
 	"os"
+
+	"github.com/Adhara-Tech/enval/cmd/version"
+	"github.com/Adhara-Tech/enval/pkg/adapters"
+	"github.com/Adhara-Tech/enval/pkg/config"
+	"github.com/Adhara-Tech/enval/pkg/infra"
+	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
+	"github.com/Adhara-Tech/enval/pkg/model"
 
 	"github.com/fatih/color"
 
@@ -18,11 +19,11 @@ import (
 )
 
 const (
-	name = "tchecker"
+	name = "enval"
 )
 
 var cmd = &cobra.Command{
-	Use:  "tchecker",
+	Use:  "enval",
 	Long: name,
 	RunE: executeCmd,
 }

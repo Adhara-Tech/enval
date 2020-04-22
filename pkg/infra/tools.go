@@ -1,9 +1,10 @@
 package infra
 
 import (
-	"Adhara-Tech/check-my-setup/pkg/adapters"
-	"Adhara-Tech/check-my-setup/pkg/model"
 	"fmt"
+
+	"github.com/Adhara-Tech/enval/pkg/adapters"
+	"github.com/Adhara-Tech/enval/pkg/model"
 
 	"gopkg.in/yaml.v2"
 

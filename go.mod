@@ -1,4 +1,4 @@
-module Adhara-Tech/check-my-setup
+module github.com/Adhara-Tech/enval
 
 go 1.14
 

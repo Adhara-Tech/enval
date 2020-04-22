@@ -1,8 +1,9 @@
 package config
 
 import (
-	"Adhara-Tech/check-my-setup/pkg/model"
 	"io/ioutil"
+
+	"github.com/Adhara-Tech/enval/pkg/model"
 
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
