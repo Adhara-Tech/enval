@@ -1,0 +1,5 @@
+name: example-application-manifest
+tools:
+  - name: java
+    flavor: openjdk
+    version: [1.11.2] # TODO decide syntax. now maven but npm can be an option

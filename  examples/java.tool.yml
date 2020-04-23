@@ -1,0 +1,14 @@
+name: java
+description: java
+command: java
+version_args: --version
+flavors:
+  - name: openjdk
+    version_args: --version #overrides
+    codesnippet: java.ingredient.openjdk.js
+    #regexp
+  - name: oracle
+    version_args: --version #overrides
+    codesnippet: java.ingredient.oracle.js
+    #regexp:
+

@@ -1,0 +1,16 @@
+bin/
+_artifacts/
+.scannerwork/
+tmp
+
+.cache
+.sonarcache
+.gocache
+.dockercaches
+
+.idea
+.vscode
+
+build/
+generated_code/
+node_modules/
