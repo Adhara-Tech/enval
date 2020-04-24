@@ -17,6 +17,7 @@ _bin:
 
 
 define compile
+	$(eval package = github.com/Adhara-Tech/enval/cmd/version)
 	$(eval os = $1)
 	$(eval extension = $2)
 
@@ -24,7 +25,7 @@ define compile
 	$(eval commit = $(shell git rev-parse --short HEAD))
 	$(eval build_time = $(shell date -u +%s))
 	$(eval tag = $(shell git describe --tags))
-	$(eval ldflags = "-X main.commitHash=$(commit) -X main.buildTime=$(build_time) -X main.branch=$(branch) -X cmd/version.version=$(tag)")
+	$(eval ldflags = "-X $(package).commitHash=$(commit) -X $(package).buildTime=$(build_time) -X $(package).branch=$(branch) -X $(package).version=$(tag)")
 
 	echo "building $(os) binary"
 	GOOS=$(os) GOARCH=amd64 packr build -ldflags=$(ldflags) -o bin/$(ARTIFACT_NAME)_$(os)_amd64$(extension) ./cmd/$(ARTIFACT_NAME).go
