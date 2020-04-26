@@ -69,9 +69,11 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 		os.Exit(1)
 	}
 
+	//TODO path should not be provided this way. If it is relative to the file, may be the file should manage that
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
-	theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter)
+	systemAdapter := adapters.NewDefaultSystemAdapter()
+	theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter, systemAdapter)
 
 	err = theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
 		if !msg.IsToolAvailable {

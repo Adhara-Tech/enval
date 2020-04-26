@@ -3,7 +3,6 @@ package manifestchecker
 import (
 	"errors"
 	"fmt"
-	"os/exec"
 
 	"github.com/Adhara-Tech/enval/pkg/model"
 
@@ -27,10 +26,14 @@ var _ Checker = (*DefaultManifestChecker)(nil)
 
 type DefaultManifestChecker struct {
 	toolsStorageAdapter ToolsStorageAdapter
+	systemAdapter       SystemAdapter
 }
 
-func NewDefaultManifestChecker(toolsStorageAdapter ToolsStorageAdapter) *DefaultManifestChecker {
-	return &DefaultManifestChecker{toolsStorageAdapter: toolsStorageAdapter}
+func NewDefaultManifestChecker(toolsStorageAdapter ToolsStorageAdapter, systemAdapter SystemAdapter) *DefaultManifestChecker {
+	return &DefaultManifestChecker{
+		toolsStorageAdapter: toolsStorageAdapter,
+		systemAdapter:       systemAdapter,
+	}
 }
 
 type ToolsStorageAdapter interface {
@@ -42,6 +45,8 @@ type VersionParser interface {
 }
 
 type SystemAdapter interface {
+	CheckCommandAvailable(command string) (bool, error)
+	GetCommandVersionOutput(commandName string, params []string) (string, error)
 }
 
 func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier CheckNotifier) error {
@@ -53,7 +58,7 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 			return err
 		}
 
-		available, err := CheckCommandAvailable(tool.Command)
+		available, err := checker.systemAdapter.CheckCommandAvailable(tool.Command)
 		if err != nil {
 			return err
 		}
@@ -67,7 +72,7 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 			return err
 		}
 
-		versionCommandOutputStr, err := GetCommandVersionOutput(tool.Command, versionCommandArgs)
+		versionCommandOutputStr, err := checker.systemAdapter.GetCommandVersionOutput(tool.Command, versionCommandArgs)
 		if err != nil {
 			return err
 		}
@@ -148,27 +153,4 @@ func keySliceFrom(keyMap map[string]string) []string {
 	}
 
 	return keyArr
-}
-
-func CheckCommandAvailable(command string) (bool, error) {
-
-	_, err := exec.LookPath(command)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-
-}
-
-func GetCommandVersionOutput(commandName string, params []string) (string, error) {
-
-	cmd := exec.Command(commandName, params...)
-
-	versionString, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
-	}
-
-	return string(versionString), nil
 }
