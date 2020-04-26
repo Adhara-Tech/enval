@@ -2,7 +2,6 @@ package manifestchecker_test
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -42,21 +41,92 @@ func (t *testSystemAdapter) GetCommandVersionOutput(commandName string, params [
 
 var _ manifestchecker.SystemAdapter = (*testSystemAdapter)(nil)
 
-func TestDefaultManifestChecker_Check(t *testing.T) {
+func manifest(toolName string, flavor *string, checks map[string]string) model.Manifest {
+	return model.Manifest{
+		Name: "demo manifest",
+		Tools: []model.ManifestTool{
+			{
+				Name:   toolName,
+				Flavor: flavor,
+				Checks: checks,
+			},
+		},
+	}
+}
+
+func ManifestFrom(toolName string, checks map[string]string) model.Manifest {
+	return manifest(toolName, nil, checks)
+}
+
+func ManifestFromWithFlavor(toolName string, flavor string, checks map[string]string) model.Manifest {
+	return manifest(toolName, &flavor, checks)
+}
+
+func TestDefaultManifestChecker_CheckValidVersions(t *testing.T) {
+	//TODO maybe externalize testdata to a file. This can be huge at some point
+	testData := []struct {
+		TestName              string
+		Manifest              model.Manifest
+		VersionOutputFilePath string
+	}{
+		{
+			TestName:              "Go language",
+			Manifest:              ManifestFrom("go", map[string]string{"version": ">= 1.14"}),
+			VersionOutputFilePath: "testdata/tools-version-output/go_1.14.output.txt",
+		},
+		{
+			TestName:              "golangci-lint go metalinter",
+			Manifest:              ManifestFrom("golangci-lint", map[string]string{"version": ">= 1.24.0"}),
+			VersionOutputFilePath: "testdata/tools-version-output/golangci-lint_1.24.output.txt",
+		},
+		{
+			TestName:              "Java openjdk ga 11",
+			Manifest:              ManifestFromWithFlavor("java", "openjdk", map[string]string{"version": ">= 11.0.0"}),
+			VersionOutputFilePath: "testdata/tools-version-output/java_openjdk_11.output.txt",
+		},
+		{
+			TestName:              "Java openjdk ga 14",
+			Manifest:              ManifestFromWithFlavor("java", "openjdk", map[string]string{"version": ">= 14.0.0"}),
+			VersionOutputFilePath: "testdata/tools-version-output/java_openjdk_14.output.txt",
+		},
+	}
+
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
 	systemAdapter := &testSystemAdapter{}
 	checker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter, systemAdapter)
 
-	systemAdapter.NextOutput("testdata/tools-version-output/go_1.14.output.txt")
+	for index := range testData {
+		currentTestData := testData[index]
+		t.Run(currentTestData.TestName, func(t *testing.T) {
+			systemAdapter.NextOutput(currentTestData.VersionOutputFilePath)
 
-	manifest := model.Manifest{
-		Name:  "go-tool-test",
-		Tools: []model.ManifestTool{{Name: "go", Checks: map[string]string{"version": ">= 1.10"}}},
+			manifest := currentTestData.Manifest
+			result, err := checker.Check(manifest, func(notification manifestchecker.Notification) {
+				require.True(t, notification.IsToolAvailable)
+				require.True(t, notification.IsVersionValid)
+			})
+
+			require.Nil(t, err)
+			require.NotNil(t, result)
+			require.True(t, result.Ok)
+		})
 	}
-	err := checker.Check(manifest, func(notification manifestchecker.Notification) {
-		fmt.Println(notification)
-	})
 
-	require.Nil(t, err)
+}
+
+func TestDefaultManifestChecker_CommandDoesNotExist(t *testing.T) {
+	t.Skip("missing test")
+}
+
+func TestDefaultManifestChecker_CommandNotConfigured(t *testing.T) {
+	t.Skip("missing test")
+}
+
+func TestDefaultManifestChecker_VersionOutputDoesNotMatchRegexp(t *testing.T) {
+	t.Skip("missing test")
+}
+
+func TestDefaultManifestChecker_FlavorNotSetInManifest(t *testing.T) {
+	t.Skip("missing test")
 }

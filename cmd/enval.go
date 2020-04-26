@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
@@ -75,7 +76,7 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 	systemAdapter := adapters.NewDefaultSystemAdapter()
 	theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter, systemAdapter)
 
-	err = theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
+	result, err := theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
 		if !msg.IsToolAvailable {
 			fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
 			return
@@ -89,7 +90,11 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 		fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
 	})
 	if err != nil {
-		panic(err)
+		return err
+	}
+
+	if !result.Ok {
+		return errors.New(result.Message)
 	}
 
 	return nil

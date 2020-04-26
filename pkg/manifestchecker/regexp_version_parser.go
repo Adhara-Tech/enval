@@ -1,6 +1,7 @@
 package manifestchecker
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 )
@@ -31,6 +32,11 @@ func (parser *RegexpVersionParser) Parse(rawVersion string) (map[string]string, 
 	pattern := regexp.MustCompile(parser.regexpPattern)
 
 	match := pattern.FindStringSubmatch(rawVersion)
+
+	if len(match) == 0 {
+		return nil, errors.New("regexp version didn't match")
+	}
+
 	resultMap := make(map[string]string)
 
 	for counter, groupName := range pattern.SubexpNames() {

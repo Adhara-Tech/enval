@@ -1,7 +1,6 @@
 package manifestchecker
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/Adhara-Tech/enval/pkg/model"
@@ -10,7 +9,7 @@ import (
 )
 
 type Checker interface {
-	Check(manifest model.Manifest, notifier CheckNotifier) error
+	Check(manifest model.Manifest, notifier CheckNotifier) (*CheckResult, error)
 }
 type Notification struct {
 	Tool               model.ManifestTool
@@ -49,39 +48,57 @@ type SystemAdapter interface {
 	GetCommandVersionOutput(commandName string, params []string) (string, error)
 }
 
-func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier CheckNotifier) error {
+type CheckResult struct {
+	Ok      bool
+	Message string
+}
+
+func ok() *CheckResult {
+	return &CheckResult{
+		Ok: true,
+	}
+}
+
+func ko(message string) *CheckResult {
+	return &CheckResult{
+		Ok:      false,
+		Message: message,
+	}
+}
+
+func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier CheckNotifier) (*CheckResult, error) {
 	for _, currentToolConfig := range manifest.Tools {
 
 		tool, err := checker.toolsStorageAdapter.Find(currentToolConfig.Name)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		available, err := checker.systemAdapter.CheckCommandAvailable(tool.Command)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if !available {
-			return errors.New("command not found. Check if available and added to path")
+			return ko("command not found. Command must be in path"), nil
 		}
 
 		versionCommandArgs, err := tool.ConsolidateVersionCommandArgsFor(currentToolConfig.Flavor)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		versionCommandOutputStr, err := checker.systemAdapter.GetCommandVersionOutput(tool.Command, versionCommandArgs)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		//fmt.Println(versionCommandOutputStr)
 
 		versionChecker, err := tool.ConsolidateVersionChecker(currentToolConfig.Flavor)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		var versionFieldValues map[string]string
@@ -89,7 +106,7 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 			parser := NewRegexVersionParser(*versionChecker.Parser.Regexp, keySliceFrom(versionChecker.Fields))
 			versionFieldValues, err = parser.Parse(versionCommandOutputStr)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			//fmt.Println(versionFieldValues)
@@ -107,25 +124,25 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 
 			versionCheckType, ok := versionChecker.Fields[fieldName]
 			if !ok {
-				//TODO
-				return fmt.Errorf("TODO versionchecktype")
+
+				return ko(fmt.Sprintf("Check configured for unknown version field [%s] in tool [%s]", fieldName, currentToolConfig.Name)), nil
 			}
 			fieldValue, ok := versionFieldValues[fieldName]
 			notification.VersionsFound[fieldName] = fieldValue
 			if !ok {
-				//TODO
-				return fmt.Errorf("TODO fieldValue")
+
+				return ko(fmt.Sprintf("Value not found for field with name [%s] in tool [%s]", fieldName, currentToolConfig.Name)), nil
 			}
 
 			if versionCheckType == "semver" {
 				version, err := semver.NewVersion(fieldValue)
 				if err != nil {
-					return err
+					return nil, err
 				}
 
 				versionContraint, err := semver.NewConstraint(expectedVersion)
 				if err != nil {
-					return err
+					return nil, err
 				}
 
 				validVersion := versionContraint.Check(version)
@@ -133,15 +150,12 @@ func (checker DefaultManifestChecker) Check(manifest model.Manifest, notifier Ch
 				if !validVersion {
 					notification.IsVersionValid = false
 				}
-				//	//TODO
-				//	//return fmt.Errorf("TODO invalid version")
-				//
-				//}
+
 			}
 		}
 		notifier(notification)
 	}
-	return nil
+	return ok(), nil
 }
 
 func keySliceFrom(keyMap map[string]string) []string {

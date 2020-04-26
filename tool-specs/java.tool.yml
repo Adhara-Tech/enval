@@ -7,8 +7,8 @@ flavors:
   - name: openjdk
     version_checker:
       parser:
-        #regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
-        regexp: 'openjdk (?P<version>\d+-)'
+        regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
+#        regexp: 'openjdk (?P<version>\d+-)' regexp for ea
       fields:
         version: semver
 #    version_args: #overrides
