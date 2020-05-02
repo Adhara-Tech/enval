@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 
@@ -74,28 +73,37 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
 	systemAdapter := adapters.NewDefaultSystemAdapter()
-	theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter, systemAdapter)
+	versionValidators := map[string]manifestchecker.FieldVersionValidator{
+		"semver": manifestchecker.SemverFieldVersionValidator{},
+	}
+	fieldVersionValidatorManager := manifestchecker.NewFieldVersionValidatorManager(versionValidators)
+	versionCheckerManager := manifestchecker.NewVersionCheckerManager(fieldVersionValidatorManager)
+	toolsManager := manifestchecker.NewToolsManager(toolsStorageAdapter, systemAdapter, versionCheckerManager)
 
-	result, err := theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
-		if !msg.IsToolAvailable {
-			fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
-			return
-		}
-
-		if !msg.IsVersionValid {
-			fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
-			return
-		}
-
-		fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
-	})
+	_, err = toolsManager.ValidateManifestAndNotify(*manifest, cmdNotifier)
 	if err != nil {
 		return err
 	}
+	//if !result.Ok {
+	//
+	//theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter, systemAdapter)
+	//
+	//result, err := theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
+	//	if !msg.IsToolAvailable {
+	//		fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
+	//		return
+	//	}
+	//
+	//	if !msg.IsVersionValid {
+	//		fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
+	//		return
+	//	}
+	//
+	//	fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
+	//})
 
-	if !result.Ok {
-		return errors.New(result.Message)
-	}
+	//	return errors.New(result.Message)
+	//}
 
 	return nil
 }
@@ -127,4 +135,18 @@ func renderVersions(tool model.ManifestTool, fieldVersions map[string]string, fi
 	}
 
 	return buffer.String()
+}
+
+func cmdNotifier(msg *manifestchecker.ToolValidationResult) {
+	if !msg.IsToolAvailable {
+		fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
+		return
+	}
+
+	if !msg.IsVersionValid {
+		fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
+		return
+	}
+
+	fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
 }

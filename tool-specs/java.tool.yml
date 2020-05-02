@@ -6,26 +6,21 @@ version_command_args:
 flavors:
   - name: openjdk
     version_checker:
-      parser:
-        regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
-#        regexp: 'openjdk (?P<version>\d+-)' regexp for ea
+      parsers:
+        - type: regexp
+          regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
+        - type: regexp
+          regexp: 'openjdk (?P<version>\d+)-ea' #ea versions
       fields:
-        version: semver
-#    version_args: #overrides
-#      - --version
-#    #openjdk 11.0.2 2019-01-15
-#    version_parser:
-#      regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
-#    version_fields:
-#      version: semver
-#      runtime_environment: fixed
-#      servver_environment: semver
-    #regexp
+        - name: version
+          type: semver #Default value semver
+          required: true #Default value true
   - name: oracle
     version_checker:
-      parser:
-        regexp: 'java (?P<version>\d+\.\d+\.\d+)'
+      parsers:
+        - type: regexp
+          regexp: 'java (?P<version>\d+\.\d+\.\d+)'
       fields:
-        version: semver
-#    codesnippet: "java.ingredient.oracle.js"
-    #regexp:
+        - name: version
+          type: semver
+          required: true

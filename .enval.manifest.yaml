@@ -8,6 +8,6 @@ tools:
   - name: go
     checks:
       version: ">= 1.14"
-  - name: golangci-lint
-    checks:
-      version: "= 1.23.7"
+#  - name: golangci-lint
+#    checks:
+#      version: "= 1.23.7"

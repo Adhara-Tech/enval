@@ -3,9 +3,9 @@ package infra
 import (
 	"fmt"
 
-	"github.com/Adhara-Tech/enval/pkg/adapters"
-	"github.com/Adhara-Tech/enval/pkg/model"
+	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
 
+	"github.com/Adhara-Tech/enval/pkg/adapters"
 	"gopkg.in/yaml.v2"
 
 	"github.com/gobuffalo/packr"
@@ -24,11 +24,10 @@ func NewDefaultToolsStorage(toolsSpecPath string) *DefaultToolsStorage {
 	return &DefaultToolsStorage{innerBox: box}
 }
 
-func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOptions) (*model.Tool, error) {
+func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOptions) (*manifestchecker.ToolSpec, error) {
 
-	tool := &model.Tool{}
 	for _, currentToolSpec := range storage.innerBox.List() {
-
+		tool := &manifestchecker.ToolSpec{}
 		toolSpecBytes, err := storage.innerBox.Find(currentToolSpec)
 		if err != nil {
 			return nil, err

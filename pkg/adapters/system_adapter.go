@@ -22,7 +22,7 @@ func (systemAdapter DefaultSystemAdapter) CheckCommandAvailable(command string) 
 	return true, nil
 }
 
-func (systemAdapter DefaultSystemAdapter) GetCommandVersionOutput(commandName string, params []string) (string, error) {
+func (systemAdapter DefaultSystemAdapter) ExecuteCommand(commandName string, params []string) (string, error) {
 	cmd := exec.Command(commandName, params...)
 
 	versionString, err := cmd.CombinedOutput()

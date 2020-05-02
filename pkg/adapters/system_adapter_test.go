@@ -20,7 +20,7 @@ func TestDefaultSystemAdapter_CheckCommandAvailable(t *testing.T) {
 func TestDefaultSystemAdapter_GetCommandVersionOutput(t *testing.T) {
 	systemAdapter := adapters.NewDefaultSystemAdapter()
 
-	versionOutput, err := systemAdapter.GetCommandVersionOutput("go", []string{"version"})
+	versionOutput, err := systemAdapter.ExecuteCommand("go", []string{"version"})
 	require.Nil(t, err)
 	require.NotEmpty(t, versionOutput)
 }

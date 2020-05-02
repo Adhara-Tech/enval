@@ -4,7 +4,10 @@ command: golangci-lint
 version_command_args:
   - version
 version_checker:
-  parser:
-    regexp: 'golangci-lint has version (?P<version>\d+\.\d+\.?\d*)'
+  parsers:
+    - type: regexp
+      regexp: 'golangci-lint has version (?P<version>\d+\.\d+\.?\d*)'
   fields:
-    version: semver
+    - name: version
+      type: semver
+      required: true
