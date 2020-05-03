@@ -1,8 +1,6 @@
 package manifestchecker
 
 import (
-	"fmt"
-
 	"github.com/Adhara-Tech/enval/pkg/exerrors"
 
 	"github.com/Adhara-Tech/enval/pkg/model"
@@ -126,8 +124,6 @@ func (tm ToolsManager) ValidateTool(manifestTool model.ManifestTool) ([]ToolVali
 		}
 
 	}
-
-	return nil, exerrors.New(fmt.Sprintf("validation could not be performed for tool [%s]", manifestTool.Name))
 }
 func (tm ToolsManager) doValidate(manifestTool model.ManifestTool, toolToCheck *ToolSpec, versionChecker *VersionCheckerSpec, flavor *string) (*ToolValidationResult, error) {
 	versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, flavor)

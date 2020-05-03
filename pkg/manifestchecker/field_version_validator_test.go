@@ -36,9 +36,13 @@ func TestSemverFieldVersionValidator_Validate_Error_FieldValueNotSemver(t *testi
 }
 
 func TestExactMatchFieldVersionValidator_Validate_ValidValue(t *testing.T) {
-	exactMatchValidator.Validate("abcd", "abcd")
+	result, err := exactMatchValidator.Validate("abcd", "abcd")
+	require.Nil(t, err)
+	require.True(t, result)
 }
 
 func TestExactMatchFieldVersionValidator_Validate_InvalidValue(t *testing.T) {
-	exactMatchValidator.Validate("abcde", "abcd")
+	result, err := exactMatchValidator.Validate("abcde", "abcd")
+	require.Nil(t, err)
+	require.False(t, result)
 }

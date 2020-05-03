@@ -45,5 +45,5 @@ func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOption
 		}
 	}
 
-	return nil, exerrors.New(fmt.Sprint("tool with name [%s] not found", toolsFindOptions.Name))
+	return nil, exerrors.New(fmt.Sprintf("tool with name [%s] not found", toolsFindOptions.Name))
 }
