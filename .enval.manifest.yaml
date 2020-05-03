@@ -13,3 +13,6 @@ tools:
   - name: node
     checks:
       version: ">= 12.13.1"
+  - name: npm
+    checks:
+      version: ">= 6.12.1"

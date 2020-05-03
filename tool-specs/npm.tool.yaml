@@ -1,0 +1,13 @@
+name: npm
+description: Node.js package manager
+command: npm
+version_command_args:
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: '(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

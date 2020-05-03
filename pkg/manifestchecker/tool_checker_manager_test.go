@@ -55,6 +55,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("node", map[string]string{"version": ">= 12.13.1"}),
 			VersionOutputFilePath: "testdata/tools-version-output/node_v12.13.1.output.txt",
 		},
+		{
+			TestName:              "npm 6.12.1",
+			Manifest:              manifestchecker.ManifestFrom("node", map[string]string{"version": ">= 6.12.1"}),
+			VersionOutputFilePath: "testdata/tools-version-output/npm_6.12.1.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
