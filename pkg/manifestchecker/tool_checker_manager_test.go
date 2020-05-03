@@ -65,6 +65,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("truffle", map[string]string{"version": ">= 5.1.13", "solidity": ">= 0.5.16"}),
 			VersionOutputFilePath: "testdata/tools-version-output/truffle_5.1.13.output.txt",
 		},
+		{
+			TestName:              "gotestsum 0.4.0",
+			Manifest:              manifestchecker.ManifestFrom("gotestsum", map[string]string{"version": "= 0.4.0"}),
+			VersionOutputFilePath: "testdata/tools-version-output/gotestsum_0.4.0.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
