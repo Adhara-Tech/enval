@@ -10,3 +10,6 @@ tools:
   - name: golangci-lint
     checks:
       version: "= 1.23.8"
+  - name: node
+    checks:
+      version: ">= 12.13.1"

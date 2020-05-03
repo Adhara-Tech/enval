@@ -1,0 +1,13 @@
+name: node
+description: Node.js runtime built on Chrome's V8
+command: node
+version_command_args:
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'v(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true
