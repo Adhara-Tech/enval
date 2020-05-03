@@ -1,0 +1,13 @@
+name: swagger-cli
+description: Swagger 2.0 and OpenAPI 3.0 command-line tool
+command: swagger-cli
+version_command_args:
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: '(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

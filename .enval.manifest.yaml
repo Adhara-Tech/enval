@@ -26,3 +26,9 @@ tools:
   - name: terraform
     checks:
       version: ">= 0.12.24"
+  - name: openapi-generator
+    checks:
+      version: ">= 4.3.0"
+  - name: swagger-cli
+    checks:
+      version: ">= 4.0"

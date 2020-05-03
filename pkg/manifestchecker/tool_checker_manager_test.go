@@ -75,6 +75,16 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("terraform", map[string]string{"version": "= 0.12.24"}),
 			VersionOutputFilePath: "testdata/tools-version-output/terraform_v0.12.24.output.txt",
 		},
+		{
+			TestName:              "openapi-generator 4.3.0",
+			Manifest:              manifestchecker.ManifestFrom("openapi-generator", map[string]string{"version": "= 4.3.0"}),
+			VersionOutputFilePath: "testdata/tools-version-output/openapi-generator_4.3.0.output.txt",
+		},
+		{
+			TestName:              "swagger-cli 4.0.2",
+			Manifest:              manifestchecker.ManifestFrom("swagger-cli", map[string]string{"version": "= 4.0.2"}),
+			VersionOutputFilePath: "testdata/tools-version-output/swagger-cli.4.0.2.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")

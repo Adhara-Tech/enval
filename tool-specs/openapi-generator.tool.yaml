@@ -1,0 +1,13 @@
+name: openapi-generator
+description: OpenAPI Generator allows generation of API client libraries (SDK generation), server stubs, documentation and configuration automatically given an OpenAPI Spec (v2, v3)
+command: openapi-generator
+version_command_args:
+  - version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: '(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true
