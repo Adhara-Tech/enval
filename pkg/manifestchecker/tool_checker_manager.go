@@ -3,6 +3,8 @@ package manifestchecker
 import (
 	"errors"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+
 	"github.com/Adhara-Tech/enval/pkg/model"
 )
 
@@ -67,51 +69,41 @@ func (tm ToolsManager) ValidateTool(manifestTool model.ManifestTool) (*ToolValid
 	toolToCheck, err := tm.toolsStorageAdapter.Find(manifestTool.Name)
 	if err != nil {
 		//TODO add error of type not found and use it
-		return &ToolValidationResult{
-			Tool:               manifestTool,
-			IsToolAvailable:    false,
-			VersionsFound:      nil,
-			VersionValidations: nil,
-			IsVersionValid:     false,
-			Error:              "tool not configured",
-		}, err
+		return nil, err
 	}
 
 	if manifestTool.IsFlavoredCheck() { // * Manifest has flavor configured
 		// ** Tool has flavor configured?
-		versionChecker, ok := toolToCheck.consolidateVersionCheckerForFlavor(manifestTool.Flavor)
-		if ok {
-			// *** yes: Check version of flavor
-			versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, nil)
-			if err != nil {
-				//TODO
-			}
-
-			checkVersionResult, err := tm.versionCheckerManager.CheckVersion(*versionChecker, versionCommandOutput, manifestTool)
-			if err != nil {
-				return nil, err
-			}
-
-			return &ToolValidationResult{
-				Tool:               manifestTool,
-				IsToolAvailable:    true,
-				VersionsFound:      checkVersionResult.VersionsFound,
-				VersionValidations: nil,
-				IsVersionValid:     checkVersionResult.IsVersionValid,
-				Error:              "",
-			}, nil
-		} else {
-			// *** no: Error not configured error
-			//TODO add error of type not found and use it
-			return &ToolValidationResult{
-				Tool:               manifestTool,
-				IsToolAvailable:    false,
-				VersionsFound:      nil,
-				VersionValidations: nil,
-				IsVersionValid:     false,
-				Error:              "flavor not configured",
-			}, err
+		versionChecker, err := toolToCheck.consolidateVersionCheckerForFlavor(manifestTool.Flavor)
+		if err != nil {
+			return nil, err
 		}
+
+		// *** yes: Check version of flavor
+		versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		if !versionCommandOutput.IsToolAvailable {
+			return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
+		}
+		if !versionCommandOutput.IsToolAvailable {
+			return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
+		}
+
+		toolValidationResult, err := tm.versionCheckerManager.CheckVersion(CheckVersionRequest{
+			VersionCheckerSpec:   *versionChecker,
+			VersionCommandOutput: versionCommandOutput.rawVersionCommandOutput,
+			ManifestTool:         manifestTool,
+		})
+
+		if err != nil {
+			return nil, err
+		}
+
+		return toolValidationResult, nil
+
 	} else { // * Manifest DOESN'T have flavor configured
 
 		if toolToCheck.HasFlavors() { // ** Has the tool flavors
@@ -122,22 +114,24 @@ func (tm ToolsManager) ValidateTool(manifestTool model.ManifestTool) (*ToolValid
 			// *** no: use main tool version checker to Check version
 			versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, nil)
 			if err != nil {
-				//TODO
+				return nil, err
 			}
 
-			checkVersionResult, err := tm.versionCheckerManager.CheckVersion(*toolToCheck.VersionChecker, versionCommandOutput, manifestTool)
+			if !versionCommandOutput.IsToolAvailable {
+				return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
+			}
+
+			toolValidationResult, err := tm.versionCheckerManager.CheckVersion(CheckVersionRequest{
+				VersionCheckerSpec:   *toolToCheck.VersionChecker,
+				VersionCommandOutput: versionCommandOutput.rawVersionCommandOutput,
+				ManifestTool:         manifestTool,
+			})
+
 			if err != nil {
 				return nil, err
 			}
 
-			return &ToolValidationResult{
-				Tool:               manifestTool,
-				IsToolAvailable:    true,
-				VersionsFound:      checkVersionResult.VersionsFound,
-				VersionValidations: nil,
-				IsVersionValid:     checkVersionResult.IsVersionValid,
-				Error:              "",
-			}, nil
+			return toolValidationResult, nil
 		}
 
 	}
@@ -145,19 +139,33 @@ func (tm ToolsManager) ValidateTool(manifestTool model.ManifestTool) (*ToolValid
 	return nil, errors.New("abnormal validation ending")
 }
 
-func (tm ToolsManager) executeVersionCommand(tool ToolSpec, flavor *string) (string, error) {
+func (tm ToolsManager) executeVersionCommand(tool ToolSpec, flavor *string) (*executionVersionCommandResult, error) {
 
 	commandAvailable, err := tm.systemAdapter.CheckCommandAvailable(tool.Command)
 	if err != nil {
-		// TODO
-	}
-	if !commandAvailable {
-		// TODO
-	}
-	commandArgs, ok := tool.consolidateVersionCommandArgsForFlavor(flavor)
-	if !ok {
-		// TODO
+		return nil, exerrors.Wrap(err)
 	}
 
-	return tm.systemAdapter.ExecuteCommand(tool.Command, commandArgs)
+	if !commandAvailable {
+		return &executionVersionCommandResult{
+			IsToolAvailable:         false,
+			rawVersionCommandOutput: "",
+		}, nil
+	}
+	commandArgs, err := tool.consolidateVersionCommandArgsForFlavor(flavor)
+	if err != nil {
+		return nil, err
+	}
+
+	rawOutput, err := tm.systemAdapter.ExecuteCommand(tool.Command, commandArgs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &executionVersionCommandResult{
+		IsToolAvailable:         true,
+		rawVersionCommandOutput: rawOutput,
+	}, nil
+
 }

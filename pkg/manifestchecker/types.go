@@ -1,6 +1,11 @@
 package manifestchecker
 
-import "github.com/Adhara-Tech/enval/pkg/model"
+import (
+	"fmt"
+
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+	"github.com/Adhara-Tech/enval/pkg/model"
+)
 
 type ToolSpec struct {
 	Name               string              `yaml:"name"`
@@ -15,49 +20,49 @@ func (t ToolSpec) HasFlavors() bool {
 	return len(t.Flavors) > 0
 }
 
-func (t ToolSpec) findFlavor(flavor string) (*FlavorSpec, bool) {
+func (t ToolSpec) findFlavor(flavor string) (*FlavorSpec, error) {
 	for index := range t.Flavors {
 		currentFlavor := t.Flavors[index]
 		if currentFlavor.Name == flavor {
-			return &currentFlavor, true
+			return &currentFlavor, nil
 
 		}
 	}
 
-	return nil, false
+	return nil, exerrors.New(fmt.Sprintf("flavor [%s] not found for tool [%s]", flavor, t.Name))
 }
 
-func (t ToolSpec) consolidateVersionCommandArgsForFlavor(flavor *string) ([]string, bool) {
+func (t ToolSpec) consolidateVersionCommandArgsForFlavor(flavor *string) ([]string, error) {
 	if flavor == nil {
-		return t.VersionCommandArgs, true
+		return t.VersionCommandArgs, nil
 	}
 
-	currentFlavor, ok := t.findFlavor(*flavor)
-	if !ok {
-		return nil, ok
+	currentFlavor, err := t.findFlavor(*flavor)
+	if err != nil {
+		return nil, err
 	}
 
 	if currentFlavor.VersionCommandArgs != nil {
-		return currentFlavor.VersionCommandArgs, true
+		return currentFlavor.VersionCommandArgs, nil
 	} else {
-		return t.VersionCommandArgs, true
+		return t.VersionCommandArgs, nil
 	}
 }
 
-func (t ToolSpec) consolidateVersionCheckerForFlavor(flavor *string) (*VersionCheckerSpec, bool) {
+func (t ToolSpec) consolidateVersionCheckerForFlavor(flavor *string) (*VersionCheckerSpec, error) {
 	if flavor == nil {
-		return t.VersionChecker, true
+		return t.VersionChecker, nil
 	}
 
-	currentFlavor, ok := t.findFlavor(*flavor)
-	if !ok {
-		return nil, ok
+	currentFlavor, err := t.findFlavor(*flavor)
+	if err != nil {
+		return nil, err
 	}
 
 	if currentFlavor.VersionChecker != nil {
-		return currentFlavor.VersionChecker, true
+		return currentFlavor.VersionChecker, nil
 	} else {
-		return t.VersionChecker, true
+		return t.VersionChecker, nil
 	}
 }
 
@@ -105,25 +110,33 @@ type VersionParserSpec struct {
 }
 
 type ToolValidationResult struct {
-	Tool               model.ManifestTool
-	IsToolAvailable    bool
-	VersionsFound      map[string]string
-	VersionValidations map[string]bool
-	IsVersionValid     bool
-	IsError            bool
-	Error              string
+	Tool             model.ManifestTool
+	IsToolAvailable  bool
+	FieldValidations map[string]FieldValidationResult
+
+	IsVersionValid bool
+	IsError        bool
+	//ResultDescription     string
 }
 
 func ToolValidationResultFor(tool model.ManifestTool) *ToolValidationResult {
 	return &ToolValidationResult{
-		Tool:               tool,
-		IsToolAvailable:    false,
-		VersionsFound:      make(map[string]string),
-		VersionValidations: make(map[string]bool),
-		IsVersionValid:     false,
-		IsError:            false,
-		Error:              "",
+		Tool:             tool,
+		IsToolAvailable:  true,
+		FieldValidations: make(map[string]FieldValidationResult),
+		//VersionsFound:      make(map[string]string),
+		//VersionValidations: make(map[string]bool),
+		IsVersionValid: true,
+		IsError:        false,
+		//ResultDescription:  "",
 	}
+}
+
+type FieldValidationResult struct {
+	FieldName         string
+	ValueFound        string
+	IsValid           bool
+	ResultDescription string
 }
 
 func (result *ToolValidationResult) WithToolAvailable(available bool) *ToolValidationResult {
@@ -132,15 +145,41 @@ func (result *ToolValidationResult) WithToolAvailable(available bool) *ToolValid
 	return result
 }
 
-func (result *ToolValidationResult) WithError(msg string) *ToolValidationResult {
-	result.IsError = true
-	result.Error = msg
+func (result *ToolValidationResult) InvalidField(field string, valueFound string, resultDescription string) *ToolValidationResult {
+	result.FieldValidations[field] = FieldValidationResult{
+		FieldName:         field,
+		ValueFound:        valueFound,
+		IsValid:           false,
+		ResultDescription: resultDescription,
+	}
+
+	result.IsVersionValid = false
 	return result
 }
 
-func (result *ToolValidationResult) AddVersionValidation(field string, valueFound string, valid bool) *ToolValidationResult {
-	result.VersionsFound[field] = valueFound
-	result.VersionValidations[field] = valid
+func (result *ToolValidationResult) ValidField(field string, valueFound string) *ToolValidationResult {
+	result.FieldValidations[field] = FieldValidationResult{
+		FieldName:  field,
+		ValueFound: valueFound,
+		IsValid:    true,
+	}
 
 	return result
+}
+
+func (result *ToolValidationResult) ToolNotAvailable() *ToolValidationResult {
+	result.IsToolAvailable = false
+	return result
+}
+
+//func (result *ToolValidationResult) AddVersionValidation(field string, valueFound string, valid bool) *ToolValidationResult {
+//	result.VersionsFound[field] = valueFound
+//	result.VersionValidations[field] = valid
+//
+//	return result
+//}
+
+type executionVersionCommandResult struct {
+	IsToolAvailable         bool
+	rawVersionCommandOutput string
 }

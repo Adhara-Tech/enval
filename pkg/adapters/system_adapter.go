@@ -3,6 +3,8 @@ package adapters
 import (
 	"os/exec"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+
 	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
 )
 
@@ -16,7 +18,7 @@ func NewDefaultSystemAdapter() *DefaultSystemAdapter {
 func (systemAdapter DefaultSystemAdapter) CheckCommandAvailable(command string) (bool, error) {
 	_, err := exec.LookPath(command)
 	if err != nil {
-		return false, err
+		return false, exerrors.Wrap(err)
 	}
 
 	return true, nil
@@ -27,7 +29,7 @@ func (systemAdapter DefaultSystemAdapter) ExecuteCommand(commandName string, par
 
 	versionString, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", err
+		return "", exerrors.Wrap(err)
 	}
 
 	return string(versionString), nil

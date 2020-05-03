@@ -3,6 +3,8 @@ package infra
 import (
 	"fmt"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+
 	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
 
 	"github.com/Adhara-Tech/enval/pkg/adapters"
@@ -30,7 +32,7 @@ func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOption
 		tool := &manifestchecker.ToolSpec{}
 		toolSpecBytes, err := storage.innerBox.Find(currentToolSpec)
 		if err != nil {
-			return nil, err
+			return nil, exerrors.Wrap(err)
 		}
 		err = yaml.Unmarshal(toolSpecBytes, tool)
 		if err != nil {
@@ -43,5 +45,5 @@ func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOption
 		}
 	}
 
-	return nil, fmt.Errorf("tool with name [%s] not found", toolsFindOptions.Name)
+	return nil, exerrors.New(fmt.Sprint("tool with name [%s] not found", toolsFindOptions.Name))
 }

@@ -3,6 +3,8 @@ package manifestchecker
 import (
 	"fmt"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+
 	"github.com/Adhara-Tech/enval/pkg/model"
 )
 
@@ -28,7 +30,41 @@ type CheckVersionResult struct {
 	CheckVersionErrorMessage string
 }
 
-func (versionCheckerManager VersionCheckerManager) CheckVersion(versionCheckerSpec VersionCheckerSpec, versionCommandOutput string, manifestTool model.ManifestTool) (*CheckVersionResult, error) {
+type CheckVersionRequest struct {
+	VersionCheckerSpec   VersionCheckerSpec
+	VersionCommandOutput string
+	ManifestTool         model.ManifestTool
+}
+
+//func (versionCheckerManager VersionCheckerManager) CheckVersion(checkVersionRequest *CheckVersionRequest) (*ToolValidationResult, error) {
+//	versionCheckerSpec := checkVersionRequest.versionCheckerSpec
+//	versionCommandOutput := checkVersionRequest.versionCommandOutput
+//	manifestTool := checkVersionRequest.manifestTool
+//
+//	versionParsers := make([]VersionParser, len(versionCheckerSpec.VersionParserArr))
+//
+//	for index, parser := range versionCheckerSpec.VersionParserArr {
+//		if parser.Type == "regexp" {
+//			regexpVersionParser := NewRegexVersionParser(parser.Regexp, versionCheckerSpec.FieldNames())
+//			versionParsers[index] = regexpVersionParser
+//		} else {
+//			return nil, exerrors.New(fmt.Sprintf("unknown parser type [%s]", parser.Type))
+//		}
+//	}
+//
+//	versionChecker := versionChecker{
+//		versionParserArr:   versionParsers,
+//		fields:             versionCheckerSpec.Fields,
+//		versionCheckerSpec: versionCheckerSpec,
+//	}
+//
+//	return versionCheckerManager.doCheckVersion(checkVersionRequest)
+//
+//}
+
+func (versionCheckerManager VersionCheckerManager) buildVersionChecker(checkVersionRequest CheckVersionRequest) (*versionChecker, error) {
+	versionCheckerSpec := checkVersionRequest.VersionCheckerSpec
+
 	versionParsers := make([]VersionParser, len(versionCheckerSpec.VersionParserArr))
 
 	for index, parser := range versionCheckerSpec.VersionParserArr {
@@ -36,21 +72,26 @@ func (versionCheckerManager VersionCheckerManager) CheckVersion(versionCheckerSp
 			regexpVersionParser := NewRegexVersionParser(parser.Regexp, versionCheckerSpec.FieldNames())
 			versionParsers[index] = regexpVersionParser
 		} else {
-			return nil, fmt.Errorf("unknown parser type [%s]", parser.Type)
+			return nil, exerrors.New(fmt.Sprintf("unknown parser type [%s]", parser.Type))
 		}
 	}
 
-	versionChecker := versionChecker{
+	versionChecker := &versionChecker{
 		versionParserArr:   versionParsers,
 		fields:             versionCheckerSpec.Fields,
 		versionCheckerSpec: versionCheckerSpec,
 	}
 
-	return versionCheckerManager.doCheckVersion(versionChecker, versionCommandOutput, manifestTool)
-
+	return versionChecker, nil
 }
 
-func (versionCheckerManager VersionCheckerManager) doCheckVersion(versionChecker versionChecker, versionCommandOutput string, tool model.ManifestTool) (*CheckVersionResult, error) {
+func (versionCheckerManager VersionCheckerManager) CheckVersion(checkVersionRequest CheckVersionRequest) (*ToolValidationResult, error) {
+	versionChecker, err := versionCheckerManager.buildVersionChecker(checkVersionRequest)
+	if err != nil {
+		return nil, err
+	}
+	versionCommandOutput := checkVersionRequest.VersionCommandOutput
+	manifestTool := checkVersionRequest.ManifestTool
 
 	for _, currentParser := range versionChecker.versionParserArr {
 
@@ -63,51 +104,42 @@ func (versionCheckerManager VersionCheckerManager) doCheckVersion(versionChecker
 			}
 		}
 
-		versionsFound := make(map[string]string)
-		isVersionValid := true
-		for fieldName, expectedVersion := range tool.Checks {
+		toolValidationResult := ToolValidationResultFor(manifestTool)
+		for fieldName, expectedVersion := range manifestTool.Checks {
 			fieldSpec, ok := versionChecker.versionCheckerSpec.GetFieldSpecBy(fieldName)
 			if !ok {
-				return &CheckVersionResult{
-					IsVersionValid:           false,
-					CheckVersionErrorMessage: fmt.Sprintf("unknown version field [%s]", fieldName),
-				}, nil
+				toolValidationResult.InvalidField(fieldName, "", fmt.Sprintf("missing field spec for [%s]", fieldName))
+				continue
 			}
 
 			fieldValue, ok := parsedVersionFields[fieldName]
 			if !ok {
-				return &CheckVersionResult{
-					IsVersionValid:           false,
-					CheckVersionErrorMessage: fmt.Sprintf(fmt.Sprintf("value not found for field [%s]", fieldName)),
-				}, nil
+				toolValidationResult.InvalidField(fieldName, "", fmt.Sprintf("value not found for field [%s]", fieldName))
+				continue
 			}
 
 			fieldVersionValidator, ok := versionCheckerManager.fieldVersionValidatorManager.FieldVersionValidator(fieldSpec)
 			if !ok {
-				return &CheckVersionResult{
-					IsVersionValid:           false,
-					CheckVersionErrorMessage: fmt.Sprintf(fmt.Sprintf("unknown field validation type [%s] for field[%s]", fieldSpec.Type, fieldName)),
-				}, nil
+				toolValidationResult.InvalidField(fieldName, fieldValue, fmt.Sprintf("unknown field validation type [%s] for field[%s]", fieldSpec.Type, fieldName))
+				continue
 			}
 
 			isFieldValid, err := fieldVersionValidator.Validate(fieldValue, expectedVersion)
 			if err != nil {
+
 				return nil, err
 			}
 
-			isVersionValid = isVersionValid && isFieldValid
-			versionsFound[fieldName] = fieldValue
+			if !isFieldValid {
+				toolValidationResult.InvalidField(fieldName, fieldValue, "")
+			} else {
+				toolValidationResult.ValidField(fieldName, fieldValue)
+			}
+
 		}
 
-		return &CheckVersionResult{
-			IsVersionValid:           isVersionValid,
-			VersionsFound:            versionsFound,
-			CheckVersionErrorMessage: "",
-		}, nil
+		return toolValidationResult, nil
 	}
 
-	return &CheckVersionResult{
-		IsVersionValid:           false,
-		CheckVersionErrorMessage: "parsers didn't match command version output",
-	}, nil
+	return nil, exerrors.New(fmt.Sprintf("parsers configured for tool [%s] couldn't match command version output [%s]", manifestTool.Name, versionCommandOutput))
 }

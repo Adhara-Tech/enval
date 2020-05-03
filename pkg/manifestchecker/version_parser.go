@@ -1,9 +1,10 @@
 package manifestchecker
 
 import (
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
 )
 
 // VersionParser interface wraps the Parse method
@@ -19,7 +20,7 @@ const unsupportedInputRawVersion = "unsupported input raw version"
 
 // NewUnsupportedInputRawVersionError creates a new UnsupportedInputRawVersionError
 func NewUnsupportedInputRawVersionError(msg string) error {
-	return errors.New(fmt.Sprint(unsupportedInputRawVersion, ". ", msg))
+	return exerrors.New(fmt.Sprint(unsupportedInputRawVersion, ". ", msg))
 }
 
 // IsUnsupportedInputRawVersionError checks if the given error is of type UnsupportedInputRawVersionError
