@@ -57,8 +57,13 @@ func TestToolsManager_Validate(t *testing.T) {
 		},
 		{
 			TestName:              "npm 6.12.1",
-			Manifest:              manifestchecker.ManifestFrom("node", map[string]string{"version": ">= 6.12.1"}),
+			Manifest:              manifestchecker.ManifestFrom("npm", map[string]string{"version": ">= 6.12.1"}),
 			VersionOutputFilePath: "testdata/tools-version-output/npm_6.12.1.output.txt",
+		},
+		{
+			TestName:              "truffle 5.1.13",
+			Manifest:              manifestchecker.ManifestFrom("truffle", map[string]string{"version": ">= 5.1.13", "solidity": ">= 0.5.16"}),
+			VersionOutputFilePath: "testdata/tools-version-output/truffle_5.1.13.output.txt",
 		},
 	}
 

@@ -16,3 +16,7 @@ tools:
   - name: npm
     checks:
       version: ">= 6.12.1"
+  - name: truffle
+    checks:
+      version: ">= 5.1.13"
+      solidity: ">= 0.5.16"
