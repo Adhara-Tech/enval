@@ -70,6 +70,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("gotestsum", map[string]string{"version": "= 0.4.0"}),
 			VersionOutputFilePath: "testdata/tools-version-output/gotestsum_0.4.0.output.txt",
 		},
+		{
+			TestName:              "terraform 0.12.24",
+			Manifest:              manifestchecker.ManifestFrom("terraform", map[string]string{"version": "= 0.12.24"}),
+			VersionOutputFilePath: "testdata/tools-version-output/terraform_v0.12.24.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
