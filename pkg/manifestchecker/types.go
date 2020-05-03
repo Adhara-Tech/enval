@@ -175,13 +175,6 @@ func (result *ToolValidationResult) NotParseableVersionOutputCommand(msg string)
 	return result
 }
 
-//func (result *ToolValidationResult) AddVersionValidation(field string, valueFound string, valid bool) *ToolValidationResult {
-//	result.VersionsFound[field] = valueFound
-//	result.VersionValidations[field] = valid
-//
-//	return result
-//}
-
 type executionVersionCommandResult struct {
 	IsToolAvailable         bool
 	rawVersionCommandOutput string

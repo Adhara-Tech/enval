@@ -86,26 +86,6 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	//if !result.Ok {
-	//
-	//theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter, systemAdapter)
-	//
-	//result, err := theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
-	//	if !msg.IsToolAvailable {
-	//		fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
-	//		return
-	//	}
-	//
-	//	if !msg.IsVersionValid {
-	//		fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
-	//		return
-	//	}
-	//
-	//	fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
-	//})
-
-	//	return errors.New(result.Message)
-	//}
 
 	return nil
 }
