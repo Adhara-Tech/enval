@@ -1,7 +1,7 @@
 package manifestchecker
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/Adhara-Tech/enval/pkg/exerrors"
 
@@ -35,20 +35,20 @@ type ToolsStorageAdapter interface {
 }
 
 func (tm ToolsManager) ValidateManifest(manifest model.Manifest) ([]ToolValidationResult, error) {
-	return tm.ValidateManifestAndNotify(manifest, func(_ *ToolValidationResult) {
+	return tm.ValidateManifestAndNotify(manifest, func(_ []ToolValidationResult) {
 
 	})
 }
 
-func (tm ToolsManager) ValidateManifestAndNotify(manifest model.Manifest, notifyFunc func(toolValidationResult *ToolValidationResult)) ([]ToolValidationResult, error) {
+func (tm ToolsManager) ValidateManifestAndNotify(manifest model.Manifest, notifyFunc func(toolValidationResult []ToolValidationResult)) ([]ToolValidationResult, error) {
 	result := make([]ToolValidationResult, 0)
 	for _, manifestTool := range manifest.Tools {
-		validationResult, err := tm.ValidateTool(manifestTool)
+		validationResultArr, err := tm.ValidateTool(manifestTool)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, *validationResult)
-		notifyFunc(validationResult)
+		result = append(result, validationResultArr...)
+		notifyFunc(validationResultArr)
 	}
 
 	return result, nil
@@ -64,79 +64,95 @@ func (tm ToolsManager) ValidateManifestAndNotify(manifest model.Manifest, notify
 // *** yes: Iterate all flavors
 // **** if flavor Version Checker match return
 // **** Version checker that matches not found: Return not match result with all the checks done
-func (tm ToolsManager) ValidateTool(manifestTool model.ManifestTool) (*ToolValidationResult, error) {
+func (tm ToolsManager) ValidateTool(manifestTool model.ManifestTool) ([]ToolValidationResult, error) {
 
 	toolToCheck, err := tm.toolsStorageAdapter.Find(manifestTool.Name)
 	if err != nil {
-		//TODO add error of type not found and use it
 		return nil, err
 	}
 
+	result := make([]ToolValidationResult, 0)
+
 	if manifestTool.IsFlavoredCheck() { // * Manifest has flavor configured
-		// ** Tool has flavor configured?
+		// Get combined version checker spec and use it
 		versionChecker, err := toolToCheck.consolidateVersionCheckerForFlavor(manifestTool.Flavor)
 		if err != nil {
 			return nil, err
 		}
 
-		// *** yes: Check version of flavor
-		versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, nil)
+		toolValidationResult, err := tm.doValidate(manifestTool, toolToCheck, versionChecker, manifestTool.Flavor)
 		if err != nil {
 			return nil, err
 		}
 
-		if !versionCommandOutput.IsToolAvailable {
-			return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
-		}
-		if !versionCommandOutput.IsToolAvailable {
-			return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
-		}
-
-		toolValidationResult, err := tm.versionCheckerManager.CheckVersion(CheckVersionRequest{
-			VersionCheckerSpec:   *versionChecker,
-			VersionCommandOutput: versionCommandOutput.rawVersionCommandOutput,
-			ManifestTool:         manifestTool,
-		})
-
-		if err != nil {
-			return nil, err
-		}
-
-		return toolValidationResult, nil
+		result = append(result, *toolValidationResult)
+		return result, nil
 
 	} else { // * Manifest DOESN'T have flavor configured
 
 		if toolToCheck.HasFlavors() { // ** Has the tool flavors
 			// *** yes: Iterate all flavors
-			// **** if flavor Version Checker match return
-			// **** Version checker that matches not found: Return not match result with all the checks done
+			for _, flavor := range toolToCheck.Flavors {
+				// **** if flavor Version Checker match return
+				flavorVersionCheckerSpec, err := toolToCheck.consolidateVersionCheckerForFlavor(&flavor.Name)
+				if err != nil {
+					return nil, err
+				}
+				toolValidationResult, err := tm.doValidate(manifestTool, toolToCheck, flavorVersionCheckerSpec, &flavor.Name)
+				if err != nil {
+					return nil, err
+				}
+
+				result = append(result, *toolValidationResult)
+
+				if toolValidationResult.IsVersionValid {
+
+					return result, nil
+				}
+				// **** Version checker that matches not found: Return not match result with all the checks done
+			}
+
+			return result, nil
+
 		} else {
 			// *** no: use main tool version checker to Check version
-			versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, nil)
+			toolValidationResult, err := tm.doValidate(manifestTool, toolToCheck, toolToCheck.VersionChecker, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			if !versionCommandOutput.IsToolAvailable {
-				return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
-			}
-
-			toolValidationResult, err := tm.versionCheckerManager.CheckVersion(CheckVersionRequest{
-				VersionCheckerSpec:   *toolToCheck.VersionChecker,
-				VersionCommandOutput: versionCommandOutput.rawVersionCommandOutput,
-				ManifestTool:         manifestTool,
-			})
-
-			if err != nil {
-				return nil, err
-			}
-
-			return toolValidationResult, nil
+			result = append(result, *toolValidationResult)
+			return result, nil
 		}
 
 	}
 
-	return nil, errors.New("abnormal validation ending")
+	return nil, exerrors.New(fmt.Sprintf("validation could not be performed for tool [%s]", manifestTool.Name))
+}
+func (tm ToolsManager) doValidate(manifestTool model.ManifestTool, toolToCheck *ToolSpec, versionChecker *VersionCheckerSpec, flavor *string) (*ToolValidationResult, error) {
+	versionCommandOutput, err := tm.executeVersionCommand(*toolToCheck, flavor)
+	if err != nil {
+		return nil, err
+	}
+
+	if !versionCommandOutput.IsToolAvailable {
+		return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
+	}
+	if !versionCommandOutput.IsToolAvailable {
+		return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
+	}
+
+	toolValidationResult, err := tm.versionCheckerManager.CheckVersion(CheckVersionRequest{
+		VersionCheckerSpec:   *versionChecker,
+		VersionCommandOutput: versionCommandOutput.rawVersionCommandOutput,
+		ManifestTool:         manifestTool,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return toolValidationResult, nil
 }
 
 func (tm ToolsManager) executeVersionCommand(tool ToolSpec, flavor *string) (*executionVersionCommandResult, error) {

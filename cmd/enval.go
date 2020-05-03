@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+
 	"github.com/Adhara-Tech/enval/cmd/version"
 	"github.com/Adhara-Tech/enval/pkg/adapters"
 	"github.com/Adhara-Tech/enval/pkg/config"
@@ -45,7 +47,7 @@ func main() {
 
 	viper.AutomaticEnv()
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Println(exerrors.ErrorStack(err))
 		os.Exit(1)
 	}
 }
@@ -137,16 +139,18 @@ func renderVersions(tool model.ManifestTool, fieldVersions map[string]manifestch
 	return buffer.String()
 }
 
-func cmdNotifier(msg *manifestchecker.ToolValidationResult) {
-	if !msg.IsToolAvailable {
-		fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
-		return
-	}
+func cmdNotifier(validationResultArr []manifestchecker.ToolValidationResult) {
+	for _, toolValidation := range validationResultArr {
+		if !toolValidation.IsToolAvailable {
+			fmt.Printf("%s %s %s", notFoundSymbol, toolName(toolValidation.Tool), "Command Not Found")
+			return
+		}
 
-	if !msg.IsVersionValid {
-		fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.FieldValidations))
-		return
-	}
+		if !toolValidation.IsVersionValid {
+			fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(toolValidation.Tool), renderVersions(toolValidation.Tool, toolValidation.FieldValidations))
+			return
+		}
 
-	fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.FieldValidations))
+		fmt.Printf("%s %s:\n%s", validSymbol, toolName(toolValidation.Tool), renderVersions(toolValidation.Tool, toolValidation.FieldValidations))
+	}
 }

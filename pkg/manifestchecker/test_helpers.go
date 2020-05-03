@@ -15,20 +15,22 @@ func (t *TestSystemAdapter) NextOutput(outputFilePath string) {
 	t.outputFilePath = outputFilePath
 }
 
+func (t *TestSystemAdapter) ClearOutput() {
+	t.outputFilePath = ""
+}
+
 func (t TestSystemAdapter) CheckCommandAvailable(command string) (bool, error) {
 	return true, nil
 }
 
 func (t *TestSystemAdapter) ExecuteCommand(commandName string, params []string) (string, error) {
 	if t.outputFilePath == "" {
-		return "", errors.New("file output path is empty")
+		return "", errors.New("test system adapter file output path is empty")
 	}
 	data, err := ioutil.ReadFile(t.outputFilePath)
 	if err != nil {
 		return "", err
 	}
-
-	t.outputFilePath = ""
 
 	return string(data), nil
 }

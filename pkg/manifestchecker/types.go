@@ -110,25 +110,21 @@ type VersionParserSpec struct {
 }
 
 type ToolValidationResult struct {
-	Tool             model.ManifestTool
-	IsToolAvailable  bool
-	FieldValidations map[string]FieldValidationResult
-
-	IsVersionValid bool
-	IsError        bool
-	//ResultDescription     string
+	Tool                            model.ManifestTool
+	IsToolAvailable                 bool
+	FieldValidations                map[string]FieldValidationResult
+	IsVersionValid                  bool
+	IsCommandVersionOutputParseable bool
+	ResultDescription               string
 }
 
 func ToolValidationResultFor(tool model.ManifestTool) *ToolValidationResult {
 	return &ToolValidationResult{
-		Tool:             tool,
-		IsToolAvailable:  true,
-		FieldValidations: make(map[string]FieldValidationResult),
-		//VersionsFound:      make(map[string]string),
-		//VersionValidations: make(map[string]bool),
-		IsVersionValid: true,
-		IsError:        false,
-		//ResultDescription:  "",
+		Tool:                            tool,
+		IsToolAvailable:                 true,
+		FieldValidations:                make(map[string]FieldValidationResult),
+		IsVersionValid:                  true,
+		IsCommandVersionOutputParseable: true,
 	}
 }
 
@@ -169,6 +165,13 @@ func (result *ToolValidationResult) ValidField(field string, valueFound string) 
 
 func (result *ToolValidationResult) ToolNotAvailable() *ToolValidationResult {
 	result.IsToolAvailable = false
+	return result
+}
+
+func (result *ToolValidationResult) NotParseableVersionOutputCommand(msg string) *ToolValidationResult {
+	result.IsCommandVersionOutputParseable = false
+	result.IsVersionValid = false
+	result.ResultDescription = msg
 	return result
 }
 

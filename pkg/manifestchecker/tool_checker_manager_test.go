@@ -1,7 +1,10 @@
 package manifestchecker_test
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
 
 	"github.com/Adhara-Tech/enval/pkg/adapters"
 	"github.com/Adhara-Tech/enval/pkg/infra"
@@ -42,6 +45,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFromWithFlavor("java", "openjdk", map[string]string{"version": ">= 14"}),
 			VersionOutputFilePath: "testdata/tools-version-output/java_openjdk_14-ea.output.txt",
 		},
+		{
+			TestName:              "Java ga 14 without flavor",
+			Manifest:              manifestchecker.ManifestFrom("java", map[string]string{"version": ">= 14"}),
+			VersionOutputFilePath: "testdata/tools-version-output/java_openjdk_14.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
@@ -61,6 +69,9 @@ func TestToolsManager_Validate(t *testing.T) {
 			systemAdapter.NextOutput(currentTestData.VersionOutputFilePath)
 
 			result, err := toolsCheckerManager.ValidateManifest(currentTestData.Manifest)
+			if err != nil {
+				fmt.Println(exerrors.ErrorStack(err))
+			}
 			require.Nil(t, err)
 			require.NotNil(t, result)
 
