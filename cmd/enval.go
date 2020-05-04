@@ -105,8 +105,9 @@ func renderVersions(tool model.ManifestTool, fieldVersions map[string]manifestch
 
 	var buffer bytes.Buffer
 	for fieldName, versionConstraint := range tool.Checks {
-		ok := fieldVersions[fieldName].IsValid
-		version := fieldVersions[fieldName].ValueFound
+		fieldValidationResult := fieldVersions[fieldName]
+		ok := fieldValidationResult.IsValid
+		version := fieldValidationResult.ValueFound
 		symbol := validSymbol
 
 		if !ok {
@@ -127,7 +128,7 @@ func cmdNotifier(validationResultArr []manifestchecker.ToolValidationResult) {
 		}
 
 		if !toolValidation.IsVersionValid {
-			fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(toolValidation.Tool), renderVersions(toolValidation.Tool, toolValidation.FieldValidations))
+			fmt.Printf("%s %s: %s\n%s", invalidSymbol, toolName(toolValidation.Tool), toolValidation.ResultDescription, renderVersions(toolValidation.Tool, toolValidation.FieldValidations))
 			return
 		}
 

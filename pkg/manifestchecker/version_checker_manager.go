@@ -115,5 +115,5 @@ func (versionCheckerManager VersionCheckerManager) CheckVersion(checkVersionRequ
 		return toolValidationResult, nil
 	}
 
-	return ToolValidationResultFor(manifestTool).NotParseableVersionOutputCommand(fmt.Sprintf("parsers configured for tool [%s] couldn't match command version output [%s]", manifestTool.Name, versionCommandOutput)), nil
+	return ToolValidationResultFor(manifestTool).NotParseableVersionOutputCommand(fmt.Sprintf("parsers configured for tool [%s] couldn't match command version output", manifestTool.Name)), nil
 }
