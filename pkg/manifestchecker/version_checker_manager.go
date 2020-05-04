@@ -36,32 +36,6 @@ type CheckVersionRequest struct {
 	ManifestTool         model.ManifestTool
 }
 
-//func (versionCheckerManager VersionCheckerManager) CheckVersion(checkVersionRequest *CheckVersionRequest) (*ToolValidationResult, error) {
-//	versionCheckerSpec := checkVersionRequest.versionCheckerSpec
-//	versionCommandOutput := checkVersionRequest.versionCommandOutput
-//	manifestTool := checkVersionRequest.manifestTool
-//
-//	versionParsers := make([]VersionParser, len(versionCheckerSpec.VersionParserArr))
-//
-//	for index, parser := range versionCheckerSpec.VersionParserArr {
-//		if parser.Type == "regexp" {
-//			regexpVersionParser := NewRegexVersionParser(parser.Regexp, versionCheckerSpec.FieldNames())
-//			versionParsers[index] = regexpVersionParser
-//		} else {
-//			return nil, exerrors.New(fmt.Sprintf("unknown parser type [%s]", parser.Type))
-//		}
-//	}
-//
-//	versionChecker := versionChecker{
-//		versionParserArr:   versionParsers,
-//		fields:             versionCheckerSpec.Fields,
-//		versionCheckerSpec: versionCheckerSpec,
-//	}
-//
-//	return versionCheckerManager.doCheckVersion(checkVersionRequest)
-//
-//}
-
 func (versionCheckerManager VersionCheckerManager) buildVersionChecker(checkVersionRequest CheckVersionRequest) (*versionChecker, error) {
 	versionCheckerSpec := checkVersionRequest.VersionCheckerSpec
 
