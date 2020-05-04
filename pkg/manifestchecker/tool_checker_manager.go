@@ -134,9 +134,6 @@ func (tm ToolsManager) doValidate(manifestTool model.ManifestTool, toolToCheck *
 	if !versionCommandOutput.IsToolAvailable {
 		return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
 	}
-	if !versionCommandOutput.IsToolAvailable {
-		return ToolValidationResultFor(manifestTool).ToolNotAvailable(), nil
-	}
 
 	toolValidationResult, err := tm.versionCheckerManager.CheckVersion(CheckVersionRequest{
 		VersionCheckerSpec:   *versionChecker,

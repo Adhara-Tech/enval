@@ -122,7 +122,7 @@ func renderVersions(tool model.ManifestTool, fieldVersions map[string]manifestch
 func cmdNotifier(validationResultArr []manifestchecker.ToolValidationResult) {
 	for _, toolValidation := range validationResultArr {
 		if !toolValidation.IsToolAvailable {
-			fmt.Printf("%s %s %s", notFoundSymbol, toolName(toolValidation.Tool), "Command Not Found")
+			fmt.Printf("%s %s: %s\n", notFoundSymbol, toolName(toolValidation.Tool), "Command Not Found")
 			return
 		}
 
