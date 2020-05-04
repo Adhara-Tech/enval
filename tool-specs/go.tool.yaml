@@ -1,0 +1,13 @@
+name: go
+description: go language compiler and tools
+command: go
+version_command_args:
+  - version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'go version go(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

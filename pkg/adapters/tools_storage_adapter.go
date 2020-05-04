@@ -2,7 +2,6 @@ package adapters
 
 import (
 	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
-	"github.com/Adhara-Tech/enval/pkg/model"
 )
 
 var _ manifestchecker.ToolsStorageAdapter = (*DefaultToolsStorageAdapter)(nil)
@@ -20,10 +19,10 @@ type ToolFindOptions struct {
 }
 
 type ToolsStorage interface {
-	Find(toolsFindOptions ToolFindOptions) (*model.Tool, error)
+	Find(toolsFindOptions ToolFindOptions) (*manifestchecker.ToolSpec, error)
 }
 
-func (adapter DefaultToolsStorageAdapter) Find(toolName string) (*model.Tool, error) {
+func (adapter DefaultToolsStorageAdapter) Find(toolName string) (*manifestchecker.ToolSpec, error) {
 	return adapter.toolsStorage.Find(ToolFindOptions{
 		Name: toolName,
 	})

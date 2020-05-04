@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
+
 	"github.com/Adhara-Tech/enval/cmd/version"
 	"github.com/Adhara-Tech/enval/pkg/adapters"
 	"github.com/Adhara-Tech/enval/pkg/config"
@@ -45,7 +47,7 @@ func main() {
 
 	viper.AutomaticEnv()
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Println(exerrors.ErrorStack(err))
 		os.Exit(1)
 	}
 }
@@ -69,25 +71,20 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 		os.Exit(1)
 	}
 
+	//TODO path should not be provided this way. If it is relative to the file, may be the file should manage that
 	toolsStorage := infra.NewDefaultToolsStorage("../../tool-specs")
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
-	theChecker := manifestchecker.NewDefaultManifestChecker(toolsStorageAdapter)
+	systemAdapter := adapters.NewDefaultSystemAdapter()
+	versionValidators := map[string]manifestchecker.FieldVersionValidator{
+		"semver": manifestchecker.SemverFieldVersionValidator{},
+	}
+	fieldVersionValidatorManager := manifestchecker.NewFieldVersionValidatorManager(versionValidators)
+	versionCheckerManager := manifestchecker.NewVersionCheckerManager(fieldVersionValidatorManager)
+	toolsManager := manifestchecker.NewToolsManager(toolsStorageAdapter, systemAdapter, versionCheckerManager)
 
-	err = theChecker.Check(*manifest, func(msg manifestchecker.Notification) {
-		if !msg.IsToolAvailable {
-			fmt.Printf("%s %s %s", notFoundSymbol, toolName(msg.Tool), "Command Not Found")
-			return
-		}
-
-		if !msg.IsVersionValid {
-			fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
-			return
-		}
-
-		fmt.Printf("%s %s:\n%s", validSymbol, toolName(msg.Tool), renderVersions(msg.Tool, msg.VersionsFound, msg.VersionValidations))
-	})
+	_, err = toolsManager.ValidateManifestAndNotify(*manifest, cmdNotifier)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil
@@ -104,12 +101,12 @@ func toolName(tool model.ManifestTool) string {
 	return tool.Name
 }
 
-func renderVersions(tool model.ManifestTool, fieldVersions map[string]string, fieldOk map[string]bool) string {
+func renderVersions(tool model.ManifestTool, fieldVersions map[string]manifestchecker.FieldValidationResult) string {
 
 	var buffer bytes.Buffer
 	for fieldName, versionConstraint := range tool.Checks {
-		ok := fieldOk[fieldName]
-		version := fieldVersions[fieldName]
+		ok := fieldVersions[fieldName].IsValid
+		version := fieldVersions[fieldName].ValueFound
 		symbol := validSymbol
 
 		if !ok {
@@ -120,4 +117,20 @@ func renderVersions(tool model.ManifestTool, fieldVersions map[string]string, fi
 	}
 
 	return buffer.String()
+}
+
+func cmdNotifier(validationResultArr []manifestchecker.ToolValidationResult) {
+	for _, toolValidation := range validationResultArr {
+		if !toolValidation.IsToolAvailable {
+			fmt.Printf("%s %s %s", notFoundSymbol, toolName(toolValidation.Tool), "Command Not Found")
+			return
+		}
+
+		if !toolValidation.IsVersionValid {
+			fmt.Printf("%s %s:\n%s", invalidSymbol, toolName(toolValidation.Tool), renderVersions(toolValidation.Tool, toolValidation.FieldValidations))
+			return
+		}
+
+		fmt.Printf("%s %s:\n%s", validSymbol, toolName(toolValidation.Tool), renderVersions(toolValidation.Tool, toolValidation.FieldValidations))
+	}
 }

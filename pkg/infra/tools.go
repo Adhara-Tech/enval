@@ -3,9 +3,11 @@ package infra
 import (
 	"fmt"
 
-	"github.com/Adhara-Tech/enval/pkg/adapters"
-	"github.com/Adhara-Tech/enval/pkg/model"
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
 
+	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
+
+	"github.com/Adhara-Tech/enval/pkg/adapters"
 	"gopkg.in/yaml.v2"
 
 	"github.com/gobuffalo/packr"
@@ -24,14 +26,13 @@ func NewDefaultToolsStorage(toolsSpecPath string) *DefaultToolsStorage {
 	return &DefaultToolsStorage{innerBox: box}
 }
 
-func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOptions) (*model.Tool, error) {
+func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOptions) (*manifestchecker.ToolSpec, error) {
 
-	tool := &model.Tool{}
 	for _, currentToolSpec := range storage.innerBox.List() {
-
+		tool := &manifestchecker.ToolSpec{}
 		toolSpecBytes, err := storage.innerBox.Find(currentToolSpec)
 		if err != nil {
-			return nil, err
+			return nil, exerrors.Wrap(err)
 		}
 		err = yaml.Unmarshal(toolSpecBytes, tool)
 		if err != nil {
@@ -44,5 +45,5 @@ func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOption
 		}
 	}
 
-	return nil, fmt.Errorf("tool with name [%s] not found", toolsFindOptions.Name)
+	return nil, exerrors.New(fmt.Sprintf("tool with name [%s] not found", toolsFindOptions.Name))
 }

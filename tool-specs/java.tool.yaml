@@ -1,0 +1,26 @@
+name: java
+description: java
+command: java
+version_command_args:
+  - --version
+flavors:
+  - name: openjdk
+    version_checker:
+      parsers:
+        - type: regexp
+          regexp: 'openjdk (?P<version>\d+\.\d+\.\d+)'
+        - type: regexp
+          regexp: 'openjdk (?P<version>\d+)-ea' #ea versions
+      fields:
+        - name: version
+          type: semver #Default value semver
+          required: true #Default value true
+  - name: oracle
+    version_checker:
+      parsers:
+        - type: regexp
+          regexp: 'java (?P<version>\d+\.\d+\.\d+)'
+      fields:
+        - name: version
+          type: semver
+          required: true

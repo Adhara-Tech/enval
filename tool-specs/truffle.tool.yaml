@@ -1,0 +1,21 @@
+name: truffle
+description: Truffle ethereum suite
+command: truffle
+version_command_args:
+  - version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'Truffle v(?P<version>\d+\.\d+\.?\d*) \(core: (?P<core>\d+\.\d+\.?\d*)\)\sSolidity v(?P<solidity>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true
+    - name: core
+      type: semver
+      required: true
+    - name: solidity
+      type: semver
+      required: true
+
+

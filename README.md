@@ -1,3 +1,8 @@
-# Check My Setup
+# Enval
 
-A tool to check if your system is ready to work in a given repository
+Environment Validator checks if your system is ready to work in given project
+
+
+
+# Quick start
+

@@ -1,0 +1,13 @@
+name: gotestsum
+description: go test runner with output optimized for humans, JUnit XML for CI integration, and a summary of the test results.
+command: gotestsum
+version_command_args:
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'gotestsum version (?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

@@ -3,12 +3,16 @@ package manifestchecker
 import (
 	"fmt"
 	"regexp"
+
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
 )
 
 type RegexpVersionParser struct {
 	regexpPattern string
 	keys          []string
 }
+
+var _ VersionParser = (*RegexpVersionParser)(nil)
 
 func NewRegexVersionParser(regexpPattern string, keys []string) *RegexpVersionParser {
 	return &RegexpVersionParser{
@@ -31,6 +35,11 @@ func (parser *RegexpVersionParser) Parse(rawVersion string) (map[string]string, 
 	pattern := regexp.MustCompile(parser.regexpPattern)
 
 	match := pattern.FindStringSubmatch(rawVersion)
+
+	if len(match) == 0 {
+		return nil, NewUnsupportedInputRawVersionError("regexp version didn't match")
+	}
+
 	resultMap := make(map[string]string)
 
 	for counter, groupName := range pattern.SubexpNames() {
@@ -41,7 +50,7 @@ func (parser *RegexpVersionParser) Parse(rawVersion string) (map[string]string, 
 
 	for _, currentKey := range parser.keys {
 		if _, ok := resultMap[currentKey]; !ok {
-			return nil, fmt.Errorf("key [%s] not found as part of regexp to find version fields on version string [%s]", currentKey, rawVersion)
+			return nil, exerrors.New(fmt.Sprintf("key [%s] not found as part of regexp to find version fields on version string [%s]", currentKey, rawVersion))
 		}
 
 	}
