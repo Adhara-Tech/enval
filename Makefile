@@ -32,7 +32,7 @@ define compile
 endef
 
 .PHONY: build
-build: _bin lint test
+build: _bin lint
 	$(call compile, darwin)
 	$(call compile, linux)
 	$(call compile, windows, .exe)

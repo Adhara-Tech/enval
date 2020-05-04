@@ -29,8 +29,26 @@ jobs:
           name: Go Tests
           command: make test
 
+  build:
+    executor: go
+    steps:
+      - checkout
+      - run:
+          name: Compile binaries
+          command: make build
+
 workflows:
   version: 2
   test:
     jobs:
       - go-test
+      - build:
+          requires:
+            - go-test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only:
+                - /^v[0-9]+(\.[0-9]+)*$/
+
