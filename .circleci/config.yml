@@ -1,0 +1,51 @@
+version: 2.1
+
+executors:
+  go:
+    docker:
+      - image: circleci/golang:1.14
+    environment:
+      GO111MODULE: "on"
+      GOPROXY: https://proxy.golang.org/
+      GOLANGCI_LINT_VERSION: 1.26.0
+jobs:
+  go-test:
+    executor:
+      name: go
+    steps:
+      - checkout
+      - run:
+          name: Install golangci-lint
+          command: |
+            curl -sLo golangci-lint.tar.gz https://github.com/golangci/golangci-lint/releases/download/v${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64.tar.gz
+            tar -xvf golangci-lint.tar.gz
+            mkdir -p ~/bin
+            mv golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64/golangci-lint ~/bin
+            echo 'export PATH="~/bin:$PATH"'
+      - run:
+          name: Go Tests
+          command: make test
+
+  build:
+    executor: go
+    steps:
+      - checkout
+      - run:
+          name: Compile binaries
+          command: make build
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - go-test
+      - build:
+          requires:
+            - go-test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only:
+                - /^v[0-9]+(\.[0-9]+)*$/
+
