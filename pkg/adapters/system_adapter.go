@@ -18,6 +18,11 @@ func NewDefaultSystemAdapter() *DefaultSystemAdapter {
 func (systemAdapter DefaultSystemAdapter) CheckCommandAvailable(command string) (bool, error) {
 	_, err := exec.LookPath(command)
 	if err != nil {
+		if execError, ok := err.(*exec.Error); ok {
+			if execError.Err == exec.ErrNotFound {
+				return false, nil
+			}
+		}
 		return false, exerrors.Wrap(err)
 	}
 
