@@ -15,7 +15,6 @@ _artifacts:
 _bin:
 	mkdir -p bin
 
-
 define compile
 	$(eval package = github.com/Adhara-Tech/enval/cmd/version)
 	$(eval os = $1)
@@ -38,7 +37,7 @@ build: _bin lint
 	$(call compile, windows, .exe)
 
 .PHONY: test
-test: _artifacts lint
+test: _artifacts lint go_mod
 	@echo "Executing tests"
 	gotestsum --format short-verbose --junitfile ${ARTIFACTS_DIR}/junit.xml -- -coverprofile=${ARTIFACTS_DIR}/coverage_ut.out ./...
 	@echo "Generating coverage report"
@@ -49,4 +48,8 @@ lint:
 	@echo "Executing linters"
 	golangci-lint run
 
+.PHONY: go_mod
+go_mod:
+	go mod tidy
+	go mod verify
 
