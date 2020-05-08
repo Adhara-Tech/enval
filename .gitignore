@@ -14,3 +14,4 @@ tmp
 build/
 generated_code/
 node_modules/
+*-packr.go

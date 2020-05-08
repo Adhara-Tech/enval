@@ -27,7 +27,9 @@ define compile
 	$(eval ldflags = "-X $(package).commitHash=$(commit) -X $(package).buildTime=$(build_time) -X $(package).branch=$(branch) -X $(package).version=$(tag)")
 
 	echo "building $(os) binary"
-	GOOS=$(os) GOARCH=amd64 packr build -ldflags=$(ldflags) -o bin/$(ARTIFACT_NAME)_$(os)_amd64$(extension) ./cmd/$(ARTIFACT_NAME).go
+	packr clean
+	packr
+	GOOS=$(os) GOARCH=amd64 go build -ldflags=$(ldflags) -o bin/$(ARTIFACT_NAME)_$(os)_amd64$(extension) ./cmd/$(ARTIFACT_NAME).go
 endef
 
 .PHONY: build

@@ -20,8 +20,8 @@ type DefaultToolsStorage struct {
 	innerBox packr.Box
 }
 
-func NewDefaultToolsStorage(toolsSpecPath string) *DefaultToolsStorage {
-	box := packr.NewBox(toolsSpecPath)
+func NewDefaultToolsStorage() *DefaultToolsStorage {
+	box := packr.NewBox("../../tool-specs")
 
 	return &DefaultToolsStorage{innerBox: box}
 }
