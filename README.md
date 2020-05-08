@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/Adhara-Tech/enval.svg?style=shield)](https://circleci.com/gh/Adhara-Tech/enval)
+
 # Enval
 
 Enval is an environment validator that checks if your system is ready to work with a given project. It helps development teams to avoid different behaviors when using different versions of the same tools and a quick way to identify all the tools you need to install to work in a project. It also helps to ensure CI pipelines are using the same version of the tools that the development team is using. It is easy to integrate and has a nice output
