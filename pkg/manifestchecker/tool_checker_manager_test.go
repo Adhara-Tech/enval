@@ -85,6 +85,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("swagger-cli", map[string]string{"version": "= 4.0.2"}),
 			VersionOutputFilePath: "testdata/tools-version-output/swagger-cli.4.0.2.output.txt",
 		},
+		{
+			TestName:              "ruby 2.6.3",
+			Manifest:              manifestchecker.ManifestFrom("ruby", map[string]string{"version": "= 2.6.3"}),
+			VersionOutputFilePath: "testdata/tools-version-output/ruby_2.6.3.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage()
