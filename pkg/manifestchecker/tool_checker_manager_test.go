@@ -85,6 +85,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("swagger-cli", map[string]string{"version": "= 4.0.2"}),
 			VersionOutputFilePath: "testdata/tools-version-output/swagger-cli.4.0.2.output.txt",
 		},
+		{
+			TestName:              "elixir 1.10.2",
+			Manifest:              manifestchecker.ManifestFrom("elixir", map[string]string{"version": "= 1.10.2"}),
+			VersionOutputFilePath: "testdata/tools-version-output/elixir_1.10.2.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage()
