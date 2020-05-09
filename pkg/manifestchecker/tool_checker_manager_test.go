@@ -85,6 +85,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("swagger-cli", map[string]string{"version": "= 4.0.2"}),
 			VersionOutputFilePath: "testdata/tools-version-output/swagger-cli.4.0.2.output.txt",
 		},
+		{
+			TestName:              "python 3.7.3",
+			Manifest:              manifestchecker.ManifestFrom("python", map[string]string{"version": "= 3.7.3"}),
+			VersionOutputFilePath: "testdata/tools-version-output/python_3.7.3.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage()
