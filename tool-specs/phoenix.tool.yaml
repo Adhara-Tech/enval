@@ -1,0 +1,14 @@
+name: phoenix
+description: Phoenix Web Framework for Elixir
+command: mix
+version_command_args:
+  - phx.new
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'Phoenix v(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

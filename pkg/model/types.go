@@ -1,8 +1,9 @@
 package model
 
 type Manifest struct {
-	Name  string         `yaml:"name"`
-	Tools []ManifestTool `yaml:"tools"`
+	Name        string         `yaml:"name"`
+	CustomSpecs string         `yaml:"custom_specs"`
+	Tools       []ManifestTool `yaml:"tools"`
 }
 
 type VersionParser struct {
