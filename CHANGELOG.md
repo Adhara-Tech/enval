@@ -16,13 +16,16 @@ For each changelong entry sections are:
 
 ## [Unreleased]
 
+
+## [0.1.0-rc2] - 2020-05-10
+
 ### Added
 
 - Document how to contribute to the project with new code or supported tools
 
 ### Fixed
 
-- Implemented `custom_specs` [#38](https://github.com/Adhara-Tech/enval/pull/38)
+- Implemented `custom_specs` [#38](https://github.com/Adhara-Tech/enval/pull/38), [#44](https://github.com/Adhara-Tech/enval/pull/44)
 
 ## [0.1.0-rc1] - 2020-05-08
 
