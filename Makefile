@@ -52,6 +52,5 @@ lint:
 
 .PHONY: go_mod
 go_mod:
-	go mod tidy
 	go mod verify
 
