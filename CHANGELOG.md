@@ -16,6 +16,10 @@ For each changelong entry sections are:
 
 ## [Unreleased]
 
+### Added
+
+- Document how to contribute to the project with new code or supported tools
+
 ### Fixed
 
 - Implemented `custom_specs` [#38](https://github.com/Adhara-Tech/enval/pull/38)
