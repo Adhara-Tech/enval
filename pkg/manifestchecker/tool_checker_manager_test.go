@@ -85,6 +85,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("swagger-cli", map[string]string{"version": "= 4.0.2"}),
 			VersionOutputFilePath: "testdata/tools-version-output/swagger-cli.4.0.2.output.txt",
 		},
+		{
+			TestName:              "phoenix 1.5.1",
+			Manifest:              manifestchecker.ManifestFrom("phoenix", map[string]string{"version": "= 1.5.1"}),
+			VersionOutputFilePath: "testdata/tools-version-output/phoenix_1.5.1.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewPackrBoxedToolsStorage()
