@@ -1,10 +1,6 @@
 package infra
 
 import (
-	"fmt"
-	"path"
-	"path/filepath"
-
 	"github.com/Adhara-Tech/enval/pkg/exerrors"
 
 	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
@@ -17,30 +13,21 @@ import (
 	_ "github.com/gobuffalo/packr"
 )
 
-var _ adapters.ToolsStorage = (*DefaultToolsStorage)(nil)
+var _ adapters.ToolsStorage = (*PackrBoxedToolsStorage)(nil)
 
 type ListFinder interface {
 	packd.Lister
 	packd.Finder
 }
 
-type DefaultToolsStorage struct {
-	innerBox  ListFinder
-	customBox ListFinder
+type PackrBoxedToolsStorage struct {
+	innerBox ListFinder
 }
 
-func NewDefaultToolsStorage() *DefaultToolsStorage {
-	return &DefaultToolsStorage{
+func NewPackrBoxedToolsStorage() *PackrBoxedToolsStorage {
+	return &PackrBoxedToolsStorage{
 		innerBox: packr.NewBox("../../tool-specs"),
 	}
-}
-
-func (storage DefaultToolsStorage) WithCustomSpecs(customSpecsPath string) *DefaultToolsStorage {
-	if !path.IsAbs(customSpecsPath) {
-		customSpecsPath = filepath.Join("..", "..", customSpecsPath)
-	}
-	storage.customBox = packr.NewBox(customSpecsPath)
-	return &storage
 }
 
 func findInBox(box ListFinder, toolsFindOptions adapters.ToolFindOptions) (*manifestchecker.ToolSpec, error) {
@@ -65,17 +52,7 @@ func findInBox(box ListFinder, toolsFindOptions adapters.ToolFindOptions) (*mani
 	return nil, nil
 }
 
-func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOptions) (*manifestchecker.ToolSpec, error) {
-	if storage.customBox != nil {
-		tool, err := findInBox(storage.customBox, toolsFindOptions)
-		if err != nil {
-			return nil, err
-		}
-		if tool != nil {
-			return tool, nil
-		}
-	}
-
+func (storage PackrBoxedToolsStorage) Find(toolsFindOptions adapters.ToolFindOptions) (*manifestchecker.ToolSpec, error) {
 	tool, err := findInBox(storage.innerBox, toolsFindOptions)
 	if err != nil {
 		return nil, err
@@ -84,5 +61,5 @@ func (storage DefaultToolsStorage) Find(toolsFindOptions adapters.ToolFindOption
 		return tool, nil
 	}
 
-	return nil, exerrors.New(fmt.Sprintf("tool with name [%s] not found", toolsFindOptions.Name))
+	return nil, adapters.NewToolNotFoundExError(toolsFindOptions.Name)
 }

@@ -1,5 +1,5 @@
 name: example-application-manifest
-custom_specs: my-specs/tools
+custom_specs: custom-tool-specs
 tools:
   - name: java
     checks:
@@ -32,3 +32,6 @@ tools:
   - name: swagger-cli
     checks:
       version: ">= 4.0"
+  - name: enval
+    checks:
+      version: ">= 0.1.0"
