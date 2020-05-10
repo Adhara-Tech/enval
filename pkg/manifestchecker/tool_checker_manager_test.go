@@ -92,7 +92,7 @@ func TestToolsManager_Validate(t *testing.T) {
 		},
 	}
 
-	toolsStorage := infra.NewDefaultToolsStorage()
+	toolsStorage := infra.NewPackrBoxedToolsStorage()
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
 	systemAdapter := &manifestchecker.TestSystemAdapter{}
 	versionValidators := map[string]manifestchecker.FieldVersionValidator{

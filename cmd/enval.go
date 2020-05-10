@@ -71,8 +71,17 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 		os.Exit(1)
 	}
 
-	toolsStorage := infra.NewDefaultToolsStorage()
-	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
+	toolsStorageChain := infra.NewToolsStorageChain()
+
+	if manifest.CustomSpecs != "" {
+		customSpecsFileStorage := infra.NewFileSystemToolsStorage(manifest.CustomSpecs)
+		toolsStorageChain.Add(customSpecsFileStorage)
+	}
+
+	boxedToolSpecsFileStorage := infra.NewPackrBoxedToolsStorage()
+	toolsStorageChain.Add(boxedToolSpecsFileStorage)
+
+	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorageChain)
 	systemAdapter := adapters.NewDefaultSystemAdapter()
 	versionValidators := map[string]manifestchecker.FieldVersionValidator{
 		"semver": manifestchecker.SemverFieldVersionValidator{},
