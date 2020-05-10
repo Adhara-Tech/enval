@@ -12,7 +12,7 @@ tools:
       version: "= 1.23.8"
   - name: packr
     checks:
-      version: ">= 4.0"
+      version: ">= 2.5.3"
   - name: enval
     checks:
       version: ">= 0.1.0"
