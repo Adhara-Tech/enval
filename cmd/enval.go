@@ -72,6 +72,9 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 	}
 
 	toolsStorage := infra.NewDefaultToolsStorage()
+	if manifest.CustomSpecs != "" {
+		toolsStorage = toolsStorage.WithCustomSpecs(manifest.CustomSpecs)
+	}
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
 	systemAdapter := adapters.NewDefaultSystemAdapter()
 	versionValidators := map[string]manifestchecker.FieldVersionValidator{
