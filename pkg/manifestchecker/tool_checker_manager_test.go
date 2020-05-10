@@ -90,9 +90,14 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("elixir", map[string]string{"version": "= 1.10.2"}),
 			VersionOutputFilePath: "testdata/tools-version-output/elixir_1.10.2.output.txt",
 		},
+    {
+			TestName:              "phoenix 1.5.1",
+			Manifest:              manifestchecker.ManifestFrom("phoenix", map[string]string{"version": "= 1.5.1"}),
+			VersionOutputFilePath: "testdata/tools-version-output/phoenix_1.5.1.output.txt",
+		},
 	}
 
-	toolsStorage := infra.NewDefaultToolsStorage()
+	toolsStorage := infra.NewPackrBoxedToolsStorage()
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
 	systemAdapter := &manifestchecker.TestSystemAdapter{}
 	versionValidators := map[string]manifestchecker.FieldVersionValidator{
