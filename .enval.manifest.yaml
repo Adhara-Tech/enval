@@ -1,5 +1,5 @@
 name: example-application-manifest
-custom_specs: .enval/custom_specs
+custom_specs: .enval
 tools:
   - name: go
     checks:
@@ -13,3 +13,6 @@ tools:
   - name: packr
     checks:
       version: ">= 2.5.3"
+  - name: enval
+    checks:
+      version: ">= 0.1.0"
