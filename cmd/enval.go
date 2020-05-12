@@ -47,7 +47,7 @@ func main() {
 
 	viper.AutomaticEnv()
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(exerrors.ErrorStack(err))
+		fmt.Println(exerrors.PrintError(err))
 		os.Exit(1)
 	}
 }
@@ -90,9 +90,16 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 	versionCheckerManager := manifestchecker.NewVersionCheckerManager(fieldVersionValidatorManager)
 	toolsManager := manifestchecker.NewToolsManager(toolsStorageAdapter, systemAdapter, versionCheckerManager)
 
+	_, err = toolsManager.IsManifestCompliant(*manifest)
+	if err != nil {
+		prettyPrintError(err)
+		os.Exit(1)
+	}
+
 	_, err = toolsManager.ValidateManifestAndNotify(*manifest, cmdNotifier)
 	if err != nil {
-		return err
+		prettyPrintError(err)
+		os.Exit(1)
 	}
 
 	return nil
@@ -107,6 +114,10 @@ func toolName(tool model.ManifestTool) string {
 		return fmt.Sprintf("%s(%s)", tool.Name, *tool.Flavor)
 	}
 	return tool.Name
+}
+
+func prettyPrintError(err error) {
+	fmt.Printf("%s%s%s Invalid Manifest:\n\t%s", invalidSymbol, invalidSymbol, invalidSymbol, exerrors.PrintError(err))
 }
 
 func renderVersions(tool model.ManifestTool, fieldVersions map[string]manifestchecker.FieldValidationResult) string {

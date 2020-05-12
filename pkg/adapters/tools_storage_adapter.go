@@ -2,7 +2,6 @@ package adapters
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Adhara-Tech/enval/pkg/exerrors"
 	"github.com/Adhara-Tech/enval/pkg/manifestchecker"
@@ -27,12 +26,11 @@ type ToolsStorage interface {
 }
 
 func NewToolNotFoundExError(toolName string) error {
-	return exerrors.New(fmt.Sprintf("tool with name [%s] not found", toolName))
+	return exerrors.New(fmt.Sprintf("tool with name [%s] not found", toolName), exerrors.ToolDefinitionNotFoundEnvalErrorKind)
 }
 
 func IsToolNotFoundExError(err error) bool {
-	errStack := exerrors.ErrorStack(err)
-	return strings.HasPrefix(errStack, "tool with name")
+	return exerrors.IsEnvalErrorWithKind(err, exerrors.ToolDefinitionNotFoundEnvalErrorKind)
 }
 
 func (adapter DefaultToolsStorageAdapter) Find(toolName string) (*manifestchecker.ToolSpec, error) {

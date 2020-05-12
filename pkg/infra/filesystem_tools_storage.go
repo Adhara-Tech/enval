@@ -34,13 +34,13 @@ func (storage FileSystemToolsStorage) findInFileSystem(toolsFindOptions adapters
 	})
 
 	if err != nil {
-		return nil, exerrors.Wrap(err)
+		return nil, exerrors.Wrap(err, exerrors.InternalEnvalErrorKind)
 	}
 
 	for _, currentToolSpec := range toolSpecFiles {
 		toolSpecBytes, err := ioutil.ReadFile(currentToolSpec)
 		if err != nil {
-			return nil, exerrors.Wrap(err)
+			return nil, exerrors.Wrap(err, exerrors.InternalEnvalErrorKind)
 		}
 
 		tool := &manifestchecker.ToolSpec{}

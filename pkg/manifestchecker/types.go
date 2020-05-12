@@ -29,7 +29,7 @@ func (t ToolSpec) findFlavor(flavor string) (*FlavorSpec, error) {
 		}
 	}
 
-	return nil, exerrors.New(fmt.Sprintf("flavor [%s] not found for tool [%s]", flavor, t.Name))
+	return nil, exerrors.New(fmt.Sprintf("flavor [%s] not found for tool [%s]", flavor, t.Name), exerrors.FlavorDefinitionNotFoundEnvalErrorKind)
 }
 
 func (t ToolSpec) consolidateVersionCommandArgsForFlavor(flavor *string) ([]string, error) {
