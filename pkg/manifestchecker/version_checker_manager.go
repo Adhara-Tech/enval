@@ -46,7 +46,7 @@ func (versionCheckerManager VersionCheckerManager) buildVersionChecker(checkVers
 			regexpVersionParser := NewRegexVersionParser(parser.Regexp, versionCheckerSpec.FieldNames())
 			versionParsers[index] = regexpVersionParser
 		} else {
-			return nil, exerrors.New(fmt.Sprintf("unknown parser type [%s]", parser.Type))
+			return nil, exerrors.New(fmt.Sprintf("unknown parser type [%s]", parser.Type), exerrors.UnknownParserEnvalErrorKind)
 		}
 	}
 

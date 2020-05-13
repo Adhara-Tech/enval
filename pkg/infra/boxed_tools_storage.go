@@ -34,7 +34,7 @@ func findInBox(box ListFinder, toolsFindOptions adapters.ToolFindOptions) (*mani
 	for _, currentToolSpec := range box.List() {
 		toolSpecBytes, err := box.Find(currentToolSpec)
 		if err != nil {
-			return nil, exerrors.Wrap(err)
+			return nil, exerrors.Wrap(err, exerrors.InternalEnvalErrorKind)
 		}
 
 		tool := &manifestchecker.ToolSpec{}

@@ -6,19 +6,60 @@ import (
 	goerrors "github.com/go-errors/errors"
 )
 
-func Wrap(err error) error {
-	return goerrors.Wrap(err, 3)
+func Wrap(err error, kind EnvalErrorKind) error {
+	return EnvalError{
+		innerError: goerrors.Wrap(err, 3),
+		kind:       kind,
+	}
 }
 
-func New(msg string) error {
-	return goerrors.Errorf(msg)
+func New(msg string, kind EnvalErrorKind) error {
+	return EnvalError{
+		innerError: goerrors.Errorf(msg),
+		kind:       kind,
+	}
 }
 
-func ErrorStack(err error) string {
-	goError, ok := err.(*goerrors.Error)
+func PrintError(err error) string {
+	envalError, ok := err.(EnvalError)
 	if ok {
-		return fmt.Sprintf("%s\n%s", goError.Error(), goError.ErrorStack())
+		return envalError.Error()
 	} else {
-		return err.Error()
+		wrappedError := Wrap(err, InternalEnvalErrorKind)
+		return wrappedError.Error()
+	}
+}
+
+type EnvalErrorKind int
+
+const (
+	InternalEnvalErrorKind = iota
+	ToolDefinitionNotFoundEnvalErrorKind
+	FlavorDefinitionNotFoundEnvalErrorKind
+	UnknownParserEnvalErrorKind
+	UnsupportedInputRawVersionEnvalErrorKind
+	FieldVersionKeyNotFoundEnvalErrorKind
+	InvalidCustomSpecsDirEnvalErrorKind
+)
+
+func IsEnvalErrorWithKind(err error, kind EnvalErrorKind) bool {
+	envalError, ok := err.(EnvalError)
+	if !ok {
+		return false
+	}
+
+	return envalError.kind == kind
+}
+
+type EnvalError struct {
+	innerError *goerrors.Error
+	kind       EnvalErrorKind
+}
+
+func (err EnvalError) Error() string {
+	if err.kind == InternalEnvalErrorKind {
+		return fmt.Sprintf("%s\n%s", err.innerError.Error(), err.innerError.ErrorStack())
+	} else {
+		return err.innerError.Error()
 	}
 }

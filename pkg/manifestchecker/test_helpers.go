@@ -11,6 +11,10 @@ type TestSystemAdapter struct {
 	outputFilePath string
 }
 
+func (t *TestSystemAdapter) CheckDirExist(path string) (bool, error) {
+	panic("implement me")
+}
+
 func (t *TestSystemAdapter) NextOutput(outputFilePath string) {
 	t.outputFilePath = outputFilePath
 }
