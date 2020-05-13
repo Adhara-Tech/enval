@@ -16,6 +16,14 @@ For each changelong entry sections are:
 
 ## [Unreleased]
 
+### Added
+
+- Custom EnvalError implementation supporting error kinds [#45](https://github.com/Adhara-Tech/enval/issues/45)
+
+### Fixed
+
+- Memory access error when custom_specs folder doesn't exist [#49](https://github.com/Adhara-Tech/enval/issues/49)
+- Stacktrace is shown when a spec wasn't found [#34](https://github.com/Adhara-Tech/enval/issues/34)
 
 ## [0.1.0-rc2] - 2020-05-10
 
