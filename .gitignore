@@ -15,3 +15,5 @@ build/
 generated_code/
 node_modules/
 *-packr.go
+
+release_message.txt

@@ -8,6 +8,9 @@ executors:
       GO111MODULE: "on"
       GOPROXY: https://proxy.golang.org/
       GOLANGCI_LINT_VERSION: 1.26.0
+  node:
+    docker:
+      - image: circleci/node
 jobs:
   go-test:
     executor:
@@ -31,11 +34,39 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install packer
-          command: go get -u github.com/gobuffalo/packr/packr
+          name: Install tools
+          command: |
+            curl -sLo golangci-lint.tar.gz https://github.com/golangci/golangci-lint/releases/download/v${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64.tar.gz
+            tar -xvf golangci-lint.tar.gz
+            mkdir -p ~/bin
+            mv golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64/golangci-lint ~/bin
+            echo 'export PATH="~/bin:$PATH"'
+            go get -u github.com/gobuffalo/packr/packr
       - run:
           name: Compile binaries
           command: make build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin/*
+
+  publish:
+    executor: node
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          # TODO:  <16-05-20, fllaca> # use a Docker image with preinstalled tooling?
+          name: Install tools
+          command: |
+            npm install -g changelog-parser
+            curl -sLO https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz
+            tar -xvf hub-linux-amd64-2.14.2.tgz
+            sudo mv hub-linux-amd64-2.14.2/bin/hub /usrl/local/bin/
+      - run:
+          name: publish
+          command: ./scripts/publish-release.sh $CIRCLE_TAG
 
 workflows:
   version: 2
@@ -52,4 +83,13 @@ workflows:
               only:
                 - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*$/
                 - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*-rc[0-9]\d*$/
-
+      - publish:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only:
+                - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*$/
+                - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*-rc[0-9]\d*$/
