@@ -31,8 +31,31 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install golangci-lint
+          command: |
+            curl -sLo golangci-lint.tar.gz https://github.com/golangci/golangci-lint/releases/download/v${GOLANGCI_LINT_VERSION}/golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64.tar.gz
+            tar -xvf golangci-lint.tar.gz
+            mkdir -p ~/bin
+            mv golangci-lint-${GOLANGCI_LINT_VERSION}-linux-amd64/golangci-lint ~/bin
+            echo 'export PATH="~/bin:$PATH"'
+            go get -u github.com/gobuffalo/packr/packr
+      - run:
           name: Compile binaries
           command: make build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bin/*
+
+  publish:
+    executor: go
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: list binaries
+          command: ls bin
 
 workflows:
   version: 2
@@ -43,9 +66,11 @@ workflows:
           requires:
             - go-test
           filters:
-            branches:
-              ignore: /.*/
+            #branches:
+              #ignore: /.*/
             tags:
               only:
                 - /^v[0-9]+(\.[0-9]+)*$/
-
+      - publish:
+          requires:
+            - build
