@@ -72,7 +72,11 @@ workflows:
   version: 2
   test:
     jobs:
-      - go-test
+      - go-test:
+          filters:
+            tags:
+              only:
+                - /.+/
       - build:
           requires:
             - go-test
