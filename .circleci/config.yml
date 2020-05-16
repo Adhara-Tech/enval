@@ -60,10 +60,10 @@ jobs:
           # TODO:  <16-05-20, fllaca> # use a Docker image with preinstalled tooling?
           name: Install tools
           command: |
-            npm install -g changelog-parser
+            sudo npm install -g changelog-parser
             curl -sLO https://github.com/github/hub/releases/download/v2.14.2/hub-linux-amd64-2.14.2.tgz
             tar -xvf hub-linux-amd64-2.14.2.tgz
-            sudo mv hub-linux-amd64-2.14.2/bin/hub /usrl/local/bin/
+            sudo mv hub-linux-amd64-2.14.2/bin/hub /usr/local/bin/
       - run:
           name: publish
           command: ./scripts/publish-release.sh $CIRCLE_TAG
