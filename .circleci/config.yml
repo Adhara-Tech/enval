@@ -31,6 +31,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install packer
+          command: go get -u github.com/gobuffalo/packr/packr
+      - run:
           name: Compile binaries
           command: make build
 
@@ -47,5 +50,6 @@ workflows:
               ignore: /.*/
             tags:
               only:
-                - /^v[0-9]+(\.[0-9]+)*$/
+                - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*$/
+                - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*-rc[0-9]\d*$/
 
