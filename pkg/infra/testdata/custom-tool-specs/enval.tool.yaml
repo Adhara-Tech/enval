@@ -1,0 +1,13 @@
+name: enval
+description: environment tools validator override
+command: enval
+version_command_args:
+  - version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: '(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

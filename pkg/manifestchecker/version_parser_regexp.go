@@ -50,7 +50,7 @@ func (parser *RegexpVersionParser) Parse(rawVersion string) (map[string]string, 
 
 	for _, currentKey := range parser.keys {
 		if _, ok := resultMap[currentKey]; !ok {
-			return nil, exerrors.New(fmt.Sprintf("key [%s] not found as part of regexp to find version fields on version string [%s]", currentKey, rawVersion))
+			return nil, exerrors.New(fmt.Sprintf("key [%s] not found as part of regexp to find version fields on version string [%s]", currentKey, rawVersion), exerrors.FieldVersionKeyNotFoundEnvalErrorKind)
 		}
 
 	}

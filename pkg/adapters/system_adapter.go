@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"os"
 	"os/exec"
 
 	"github.com/Adhara-Tech/enval/pkg/exerrors"
@@ -23,7 +24,7 @@ func (systemAdapter DefaultSystemAdapter) CheckCommandAvailable(command string) 
 				return false, nil
 			}
 		}
-		return false, exerrors.Wrap(err)
+		return false, exerrors.Wrap(err, exerrors.InternalEnvalErrorKind)
 	}
 
 	return true, nil
@@ -34,10 +35,27 @@ func (systemAdapter DefaultSystemAdapter) ExecuteCommand(commandName string, par
 
 	versionString, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", exerrors.Wrap(err)
+		return "", exerrors.Wrap(err, exerrors.InternalEnvalErrorKind)
 	}
 
 	return string(versionString), nil
+}
+
+func (systemAdapter DefaultSystemAdapter) CheckDirExist(path string) (bool, error) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, exerrors.Wrap(err, exerrors.InternalEnvalErrorKind)
+	}
+
+	if !fileInfo.IsDir() {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 var _ manifestchecker.SystemAdapter = (*DefaultSystemAdapter)(nil)

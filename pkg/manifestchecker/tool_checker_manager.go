@@ -1,8 +1,9 @@
 package manifestchecker
 
 import (
-	"github.com/Adhara-Tech/enval/pkg/exerrors"
+	"fmt"
 
+	"github.com/Adhara-Tech/enval/pkg/exerrors"
 	"github.com/Adhara-Tech/enval/pkg/model"
 )
 
@@ -14,6 +15,8 @@ type ToolsManager struct {
 
 type SystemAdapter interface {
 	CheckCommandAvailable(command string) (bool, error)
+	// Returns true if the directory exists. Returns false if the path does not exist or if it is a file
+	CheckDirExist(path string) (bool, error)
 	ExecuteCommand(commandName string, params []string) (string, error)
 }
 
@@ -50,6 +53,29 @@ func (tm ToolsManager) ValidateManifestAndNotify(manifest model.Manifest, notify
 	}
 
 	return result, nil
+}
+
+func (tm ToolsManager) IsManifestCompliant(manifest model.Manifest) (bool, error) {
+	if manifest.CustomSpecs != "" {
+		ok, err := tm.systemAdapter.CheckDirExist(manifest.CustomSpecs)
+		if err != nil {
+			return false, err
+		}
+
+		if !ok {
+			return false, exerrors.New(fmt.Sprintf("Custom specs directory [%s] defined in manifest does not exist or it is not a directory", manifest.CustomSpecs), exerrors.InvalidCustomSpecsDirEnvalErrorKind)
+		}
+
+	}
+
+	for _, manifestTool := range manifest.Tools {
+		_, err := tm.toolsStorageAdapter.Find(manifestTool.Name)
+		if err != nil {
+			return false, err
+		}
+	}
+
+	return true, nil
 }
 
 // * Manifest has flavor configured
@@ -152,7 +178,7 @@ func (tm ToolsManager) executeVersionCommand(tool ToolSpec, flavor *string) (*ex
 
 	commandAvailable, err := tm.systemAdapter.CheckCommandAvailable(tool.Command)
 	if err != nil {
-		return nil, exerrors.Wrap(err)
+		return nil, err
 	}
 
 	if !commandAvailable {

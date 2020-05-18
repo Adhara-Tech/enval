@@ -2,7 +2,6 @@ package manifestchecker
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Adhara-Tech/enval/pkg/exerrors"
 )
@@ -16,14 +15,12 @@ type VersionParser interface {
 	Parse(rawVersion string) (map[string]string, error)
 }
 
-const unsupportedInputRawVersion = "unsupported input raw version"
-
 // NewUnsupportedInputRawVersionError creates a new UnsupportedInputRawVersionError
 func NewUnsupportedInputRawVersionError(msg string) error {
-	return exerrors.New(fmt.Sprint(unsupportedInputRawVersion, ". ", msg))
+	return exerrors.New(fmt.Sprint("unsupported input raw version. ", msg), exerrors.UnsupportedInputRawVersionEnvalErrorKind)
 }
 
 // IsUnsupportedInputRawVersionError checks if the given error is of type UnsupportedInputRawVersionError
 func IsUnsupportedInputRawVersionError(err error) bool {
-	return strings.HasPrefix(err.Error(), unsupportedInputRawVersion)
+	return exerrors.IsEnvalErrorWithKind(err, exerrors.UnsupportedInputRawVersionEnvalErrorKind)
 }

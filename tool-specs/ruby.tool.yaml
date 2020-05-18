@@ -1,0 +1,13 @@
+name: ruby
+description: Ruby language
+command: ruby
+version_command_args:
+  - -v
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'ruby (?P<version>\d+\.\d+\.?\d)'
+  fields:
+    - name: version
+      type: semver
+      required: true

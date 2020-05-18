@@ -1,9 +1,6 @@
 name: example-application-manifest
-custom_specs: my-specs/tools
+custom_specs: .enval
 tools:
-  - name: java
-    checks:
-      version: ">= 11.0.0"
   - name: go
     checks:
       version: ">= 1.14"
@@ -13,22 +10,9 @@ tools:
   - name: golangci-lint
     checks:
       version: "= 1.23.8"
-  - name: node
+  - name: packr
     checks:
-      version: ">= 12.13.1"
-  - name: npm
+      version: ">= 2.5.3"
+  - name: enval
     checks:
-      version: ">= 6.12.1"
-  - name: truffle
-    checks:
-      version: ">= 5.1.13"
-      solidity: ">= 0.5.16"
-  - name: terraform
-    checks:
-      version: ">= 0.12.24"
-  - name: openapi-generator
-    checks:
-      version: ">= 4.3.0"
-  - name: swagger-cli
-    checks:
-      version: ">= 4.0"
+      version: ">= 0.1.0"

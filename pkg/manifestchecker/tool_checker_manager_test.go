@@ -85,9 +85,29 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("swagger-cli", map[string]string{"version": "= 4.0.2"}),
 			VersionOutputFilePath: "testdata/tools-version-output/swagger-cli.4.0.2.output.txt",
 		},
+		{
+			TestName:              "python 3.7.3",
+			Manifest:              manifestchecker.ManifestFrom("python", map[string]string{"version": "= 3.7.3"}),
+			VersionOutputFilePath: "testdata/tools-version-output/python_3.7.3.output.txt",
+		},
+		{
+			TestName:              "ruby 2.6.3",
+			Manifest:              manifestchecker.ManifestFrom("ruby", map[string]string{"version": "= 2.6.3"}),
+			VersionOutputFilePath: "testdata/tools-version-output/ruby_2.6.3.output.txt",
+		},
+		{
+			TestName:              "elixir 1.10.2",
+			Manifest:              manifestchecker.ManifestFrom("elixir", map[string]string{"version": "= 1.10.2"}),
+			VersionOutputFilePath: "testdata/tools-version-output/elixir_1.10.2.output.txt",
+		},
+		{
+			TestName:              "phoenix 1.5.1",
+			Manifest:              manifestchecker.ManifestFrom("phoenix", map[string]string{"version": "= 1.5.1"}),
+			VersionOutputFilePath: "testdata/tools-version-output/phoenix_1.5.1.output.txt",
+		},
 	}
 
-	toolsStorage := infra.NewDefaultToolsStorage()
+	toolsStorage := infra.NewPackrBoxedToolsStorage()
 	toolsStorageAdapter := adapters.NewDefaultStorageAdapter(toolsStorage)
 	systemAdapter := &manifestchecker.TestSystemAdapter{}
 	versionValidators := map[string]manifestchecker.FieldVersionValidator{
@@ -105,7 +125,7 @@ func TestToolsManager_Validate(t *testing.T) {
 
 			result, err := toolsCheckerManager.ValidateManifest(currentTestData.Manifest)
 			if err != nil {
-				fmt.Println(exerrors.ErrorStack(err))
+				fmt.Println(exerrors.PrintError(err))
 			}
 			require.Nil(t, err)
 			require.NotNil(t, result)

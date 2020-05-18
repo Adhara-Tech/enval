@@ -1,0 +1,13 @@
+name: elixir
+description: Elixir language
+command: elixir
+version_command_args:
+  - -v
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'Elixir (?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

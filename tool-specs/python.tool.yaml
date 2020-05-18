@@ -1,0 +1,13 @@
+name: python
+description: Python language
+command: python
+version_command_args:
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'Python (?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

@@ -1,0 +1,14 @@
+---
+name: packr
+description: https://github.com/gobuffalo/packr
+command: packr
+version_command_args:
+  - version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'v(?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true
