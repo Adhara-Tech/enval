@@ -16,6 +16,8 @@ For each changelong entry sections are:
 
 ## [Unreleased]
 
+## [0.1.0-rc3] - 2020-05-19
+
 ### Added
 
 - Custom EnvalError implementation supporting error kinds [#45](https://github.com/Adhara-Tech/enval/issues/45)
