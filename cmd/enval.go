@@ -96,12 +96,16 @@ func executeCmd(_ *cobra.Command, _ []string) error {
 		os.Exit(1)
 	}
 
-	_, err = toolsManager.ValidateManifestAndNotify(*manifest, cmdNotifier)
+	results, err := toolsManager.ValidateManifestAndNotify(*manifest, cmdNotifier)
 	if err != nil {
 		prettyPrintError(err)
 		os.Exit(1)
 	}
-
+	for _, result := range results {
+		if !result.IsValid() {
+			os.Exit(1)
+		}
+	}
 	return nil
 }
 
@@ -117,7 +121,7 @@ func toolName(tool model.ManifestTool) string {
 }
 
 func prettyPrintError(err error) {
-	fmt.Printf("%s%s%s Invalid Manifest:\n\t%s", invalidSymbol, invalidSymbol, invalidSymbol, exerrors.PrintError(err))
+	fmt.Printf("%s%s%s Invalid Manifest:\n\t%s\n", invalidSymbol, invalidSymbol, invalidSymbol, exerrors.PrintError(err))
 }
 
 func renderVersions(tool model.ManifestTool, fieldVersions map[string]manifestchecker.FieldValidationResult) string {
