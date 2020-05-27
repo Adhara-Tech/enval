@@ -16,6 +16,8 @@ For each changelong entry sections are:
 
 ## [Unreleased]
 
+## [0.1.0-rc4] - 2020-05-27
+
 ### Fixed
 
 - Fixed exit code when validation fails, changed from zero to one. 
