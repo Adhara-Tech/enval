@@ -1,0 +1,13 @@
+name: php
+description: PHP
+command: php
+version_command_args:
+  - --version
+version_checker:
+  parsers:
+    - type: regexp
+      regexp: 'PHP (?P<version>\d+\.\d+\.?\d*)'
+  fields:
+    - name: version
+      type: semver
+      required: true

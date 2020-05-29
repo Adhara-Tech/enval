@@ -105,6 +105,11 @@ func TestToolsManager_Validate(t *testing.T) {
 			Manifest:              manifestchecker.ManifestFrom("phoenix", map[string]string{"version": "= 1.5.1"}),
 			VersionOutputFilePath: "testdata/tools-version-output/phoenix_1.5.1.output.txt",
 		},
+		{
+			TestName:              "php 7.1.4",
+			Manifest:              manifestchecker.ManifestFrom("php", map[string]string{"version": "= 7.1.4"}),
+			VersionOutputFilePath: "testdata/tools-version-output/php_7.1.4.output.txt",
+		},
 	}
 
 	toolsStorage := infra.NewPackrBoxedToolsStorage()

@@ -215,6 +215,14 @@ Flavors: No
 | core    | semver            |
 | solidity    | semver            |
 
+### [PHP](https://www.php.net/)
+
+Tool Name: **PHP**
+Flavors: No
+
+| Field        | Kind  |
+| ------------- |:-------------|
+| version    | semver            |
 
 # How to define a new tool or override an existing one
 
