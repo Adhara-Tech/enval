@@ -16,6 +16,34 @@ For each changelong entry sections are:
 
 ## [Unreleased]
 
+## [0.1.0] - 2020-06-12
+
+This is the very first version of `enval`! This first version provides a way to validate the tools in your $PATH according to a `.enval.manifest.yaml` spec, so you can ensure you have the right versions to build and test your software project.
+
+Thanks a lot to @hrodes, @figuerascarlos, @fllaca, @aagonzalezro, @aferrandini and @santiagoaldanondo for making it possible!
+
+### Added
+
+- Validation of tools in PATH according to version specs
+- Support for following tools:
+    - java
+    - go
+    - gotestsum
+    - golangci-lint
+    - node
+    - npm
+    - truffle
+    - terraform
+    - openapi-generator
+    - swagger-cli
+    - elixir
+    - enval itself!
+    - php
+    - python
+    - ruby
+- Add `custom_specs` to add extra tools or override the default specs
+- Support for tool flavors (for instance in **Java**: openjdk, oracle)
+
 ## [0.1.0-rc4] - 2020-05-27
 
 ### Fixed
