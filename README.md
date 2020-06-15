@@ -1,4 +1,5 @@
-[![CircleCI](https://circleci.com/gh/Adhara-Tech/enval.svg?style=shield)](https://circleci.com/gh/Adhara-Tech/enval)
+[![CircleCI](https://circleci.com/gh/Adhara-Tech/enval.svg?style=shield)](https://circleci.com/gh/Adhara-Tech/enval) 
+[![<Sonarcloud quality gate>](https://sonarcloud.io/api/project_badges/measure?project=citrus&metric=alert_status)](https://sonarcloud.io/dashboard?id=citrus)
 
 # Enval
 
