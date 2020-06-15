@@ -28,6 +28,7 @@ jobs:
       - run:
           name: Go Tests
           command: make test
+      - sonarcloud/scan
 
   build:
     executor: go
@@ -97,3 +98,6 @@ workflows:
               only:
                 - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*$/
                 - /^v[0-9]\d*\.[0-9]\d*\.[0-9]\d*-rc[0-9]\d*$/
+
+orbs:
+  sonarcloud: sonarsource/sonarcloud@1.0.1
